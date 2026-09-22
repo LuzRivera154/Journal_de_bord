@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Base de données locale
+*.db
+*.sqlite3
+data/*.db
+
+# Données générées à l'exécution (gardées hors dépôt, seules les .gitkeep restent)
+data/captures/*
+!data/captures/.gitkeep
+data/astrometry_index/*
+!data/astrometry_index/.gitkeep
+
+# Secrets / environnement
+.env
+*.local.yaml
+
+# Logs
+*.log
+
+# Éditeurs / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node (si l'interface évolue vers un build)
+node_modules/

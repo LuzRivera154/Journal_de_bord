@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: journal-db
+    environment:
+      - POSTGRES_USER=journal
+      - POSTGRES_PASSWORD=journal
+      - POSTGRES_DB=journal_de_bord
+    ports:
+      - "5432:5432"  # exposé pour pouvoir inspecter la base depuis l'hôte (psql, DBeaver...)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U journal -d journal_de_bord"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: journal-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./frontend:/app/frontend:ro
+      - ./data:/app/data
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - DATABASE_URL=postgresql+psycopg2://journal:journal@db:5432/journal_de_bord
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: journal-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    # Après le premier démarrage : docker exec journal-ollama ollama pull qwen2.5:3b
+
+volumes:
+  postgres_data:
+  ollama_data:
+
+# Identifiants Postgres en dur ci-dessus : acceptables pour un prototype de
+# home lab isolé d'Internet. Pour toute exposition au-delà du réseau local,
+# les passer en variables d'environnement (fichier .env non versionné).

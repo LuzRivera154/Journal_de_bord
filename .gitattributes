@@ -1,0 +1,12 @@
+# Force les fins de ligne en LF dans le dépôt, peu importe l'OS de la
+# personne qui commit (évite des diffs bruités entre Windows et Linux).
+* text=auto eol=lf
+
+# Fichiers Windows qui ont besoin de CRLF pour fonctionner correctement
+*.bat text eol=crlf
+
+# Binaires : jamais de conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary

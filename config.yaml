@@ -1,0 +1,68 @@
+# Configuration centralisée du Journal de bord (cf. cahier des charges, NFR "Maintenabilité").
+# Toute valeur ajustable par l'équipe pendant la semaine de workshop vit ici,
+# jamais en dur dans le code.
+
+app:
+  name: "Journal de bord de la navette"
+  debug: true
+
+database:
+  # Valeur utilisée en développement local (backend lancé hors Docker, avec un
+  # PostgreSQL local sur le port par défaut). En conteneur, docker-compose.yml
+  # surcharge cette valeur via la variable d'environnement DATABASE_URL
+  # (hôte "db" = nom du service Postgres dans le réseau Docker).
+  url: "postgresql+psycopg2://journal:journal@localhost:5432/journal_de_bord"
+
+ollama:
+  base_url: "http://localhost:11434"
+  model: "qwen2.5:3b"
+  enabled: true
+  timeout_seconds: 90
+
+scheduler:
+  enabled: true
+  observation_interval_minutes: 60   # OBS-01 : intervalle des prises de vue automatiques
+  journal_generation_hour: 22        # JRN-01 : heure fixe de génération quotidienne (0-23)
+
+alerts:
+  # STA-05 : seuils déclenchant une alerte + incident automatique
+  oxygene_min: 19.5
+  temperature_min: 15.0
+  temperature_max: 30.0
+  humidite_max: 70.0
+
+navigation:
+  vitesse_defaut: 12.5   # unités de distance / jour
+  position_initiale:
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  destination:
+    nom: "Proxima b"
+    x: 4200.0
+    y: 1800.0
+    z: 900.0
+
+camera:
+  capture_dir: "../data/captures"
+  # Chemin fixe utile pour les tests / démo (ex: capture Stellarium pré-enregistrée).
+  # Laisser null pour capturer depuis la webcam pointée sur l'écran du planétarium.
+  source_image: null
+
+astrometry:
+  solve_field_path: "solve-field"   # binaire astrometry.net, doit être dans le PATH du conteneur
+  index_dir: "../data/astrometry_index"
+  timeout_seconds: 60
+
+dht22:
+  serial_port: "COM3"
+  baud_rate: 9600
+  read_timeout_seconds: 5
+
+# Secteurs créés au premier démarrage si la table est vide.
+secteurs_initiaux:
+  - "Pont"
+  - "Serre"
+  - "Dortoirs"
+  - "Machinerie"
+  - "Laboratoire"

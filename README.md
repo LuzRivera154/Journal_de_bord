@@ -47,10 +47,15 @@ docker compose version
 git clone <url-du-depot>
 cd Journal_de_bord
 
-# 2. Démarrer la base de données (sous Windows : Docker Desktop doit être ouvert)
+# 2. Créer le fichier .env (jamais commité, voir .env.example)
+cp .env.example .env
+
+# 3. Démarrer la base de données (sous Windows : Docker Desktop doit être ouvert)
 docker compose up -d db
 
-# 3. Créer l'environnement virtuel et installer les dépendances
+# 4. Créer l'environnement virtuel et installer les dépendances
+# IMPORTANT : bien être dans backend/ à ce stade (donc juste après le "cd backend"
+# ci-dessus), sinon le venv se crée au mauvais endroit et rien ne fonctionne ensuite.
 cd backend
 python3 -m venv venv          # sous Windows : python -m venv venv
 
@@ -86,6 +91,26 @@ Tester dans l'ordre :
 Si l'étape 2 échoue mais que l'étape 1 a marché, le problème vient de la
 connexion à la base — voir Dépannage ci-dessous.
 
+## Voir les tables de la base de données
+
+Il y a **Adminer** (équivalent de phpMyAdmin, mais pour PostgreSQL) inclus
+dans le `docker-compose.yml`. Pratique pour voir les tables et les données
+sans taper de SQL à la main.
+
+```bash
+docker compose up -d adminer
+```
+
+Puis ouvrir **http://localhost:8080** et se connecter avec :
+
+| Champ | Valeur |
+|---|---|
+| Système | PostgreSQL |
+| Serveur | `db` (pas `localhost` — c'est le nom du service Docker) |
+| Utilisateur | valeur de `POSTGRES_USER` dans votre `.env` |
+| Mot de passe | valeur de `POSTGRES_PASSWORD` dans votre `.env` |
+| Base de données | valeur de `POSTGRES_DB` dans votre `.env` |
+
 ## Tout arrêter
 
 ```bash
@@ -120,3 +145,6 @@ Journal_de_bord/
 | `python --version` ouvre le Microsoft Store (Windows) | Python n'est pas vraiment installé, réinstaller depuis le lien ci-dessus |
 | `pip install` échoue | Vérifier que l'environnement virtuel est activé (le prompt doit commencer par `(venv)`) |
 | `/api/secteurs` renvoie une erreur de connexion à la base | Lancer `docker ps` et vérifier que le conteneur `journal-db` est `healthy` (peut prendre ~10s à démarrer) |
+| `RuntimeError: DATABASE_URL manquant` au lancement de `uvicorn` | Le fichier `.env` n'existe pas encore : `cp .env.example .env` à la racine du projet |
+| `uvicorn : le terme n'est pas reconnu` alors que `(venv)` est affiché | Le venv a été créé au mauvais endroit (à la racine au lieu de `backend/`). Supprimer ce venv vide, puis refaire `cd backend` avant `python -m venv venv` |
+| Une commande marche puis, après un `pip install` ou une install (Python, Docker...), la même commande "n'est pas reconnue" | Le PATH est resté en mémoire depuis avant l'installation. Fermer complètement le terminal (voire VS Code) et en rouvrir un nouveau |

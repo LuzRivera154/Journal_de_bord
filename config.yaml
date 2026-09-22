@@ -6,12 +6,9 @@ app:
   name: "Journal de bord de la navette"
   debug: true
 
-database:
-  # Valeur utilisée en développement local (backend lancé hors Docker, avec un
-  # PostgreSQL local sur le port par défaut). En conteneur, docker-compose.yml
-  # surcharge cette valeur via la variable d'environnement DATABASE_URL
-  # (hôte "db" = nom du service Postgres dans le réseau Docker).
-  url: "postgresql+psycopg2://journal:journal@localhost:5432/journal_de_bord"
+# La configuration de la base de données (utilisateur, mot de passe, URL de
+# connexion) n'est pas ici : elle vient du fichier .env, jamais commité.
+# Voir .env.example à la racine du projet.
 
 ollama:
   base_url: "http://localhost:11434"

@@ -39,6 +39,7 @@ def _creer_secteurs_initiaux():
         db.close()
 
 
+@app.get("/health")
 @app.get("/api/health")
 def health():
     return {"status": "ok"}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Navigation — Journal de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <nav class="rail" id="rail" aria-label="Sections du tableau de bord"></nav>
+
+  <main class="contenu">
+    <div class="entete-page">
+      <h1>Navigation</h1>
+      <button class="bouton bouton-principal" type="button" id="bouton-calculer">Calculer la position du jour</button>
+    </div>
+    <p class="note" id="message-etat" hidden></p>
+
+    <section class="panneau" style="margin-bottom:16px">
+      <div class="panneau-tete"><h2>Position du jour</h2><span class="pastille" id="pastille-methode"></span></div>
+      <dl class="donnees" id="donnees-position">
+        <div><dt>Date</dt><dd id="pos-date">n/d</dd></div>
+        <div><dt>X</dt><dd id="pos-x">n/d</dd></div>
+        <div><dt>Y</dt><dd id="pos-y">n/d</dd></div>
+        <div><dt>Z</dt><dd id="pos-z">n/d</dd></div>
+        <div><dt>Vitesse</dt><dd id="pos-vitesse">n/d</dd></div>
+        <div><dt>Incertitude</dt><dd id="pos-incertitude">n/d</dd></div>
+      </dl>
+    </section>
+
+    <!-- La carte du trajet (canvas) est une autre user story (NAV-03), pas encore faite ici. -->
+
+    <section class="panneau">
+      <div class="panneau-tete"><h2>Historique des positions</h2></div>
+      <div class="tableau-conteneur">
+        <table>
+          <thead><tr><th>Date</th><th>X</th><th>Y</th><th>Z</th><th>Vitesse</th><th>Incertitude</th><th>Méthode</th></tr></thead>
+          <tbody id="table-positions"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="js/sidebar.js"></script>
+<script src="js/navigation.js"></script>
+</body>
+</html>

@@ -18,8 +18,9 @@ ollama:
 
 scheduler:
   enabled: true
-  observation_interval_minutes: 60   # OBS-01 : intervalle des prises de vue automatiques
-  journal_generation_hour: 22        # JRN-01 : heure fixe de génération quotidienne (0-23)
+  navigation_calculation_hour: 0      # NAV-01 : heure fixe du calcul de position quotidien (0-23)
+  observation_interval_minutes: 60    # OBS-01 : intervalle des prises de vue automatiques
+  journal_generation_hour: 22         # JRN-01 : heure fixe de génération quotidienne (0-23)
 
 alerts:
   # STA-05 : seuils déclenchant une alerte + incident automatique

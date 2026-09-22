@@ -1,1 +1,122 @@
-# Journal_de_bord
+# Journal de bord de la navette
+
+Backend du projet "Journal de bord" (workshop Horizon 2080 / ESA — voir
+`Cahier des charges Journal de bord de la navette.docx.pdf` pour le détail
+complet des besoins).
+
+## État actuel
+
+Ceci est un **squelette**, pas le projet terminé. Ce qui fonctionne déjà :
+
+- Connexion à PostgreSQL
+- Les 9 tables de la base de données (section 8 du cahier des charges)
+- Un endpoint de test pour vérifier que tout est bien connecté
+
+Ce qu'il **reste à faire** (à répartir dans l'équipe, voir section 12 du
+cahier des charges) : les modules Observation stellaire, Navigation,
+Statistiques, Journal et Assistant. Chacun sera un nouveau fichier dans
+`backend/routers/` (et sa logique dans `backend/services/`).
+
+## Prérequis
+
+Le projet tourne pareil sous Windows et sous Linux : la base de données et
+Ollama sont dans des conteneurs Docker (identiques quel que soit l'OS), et
+Python/FastAPI sont multiplateformes. Seules les commandes d'installation
+changent.
+
+- **Python 3.12** :
+  - Windows : [téléchargement direct (64 bits)](https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe). Pendant l'installation, cocher "Add python.exe to PATH".
+  - Linux : `sudo apt install python3 python3-venv python3-pip` (Debian/Ubuntu), ou l'équivalent de votre distribution.
+- **Docker** :
+  - Windows : [Docker Desktop](https://www.docker.com/products/docker-desktop/) (avec WSL2).
+  - Linux : [Docker Engine](https://docs.docker.com/engine/install/) (paquet natif de votre distribution, pas besoin de "Desktop").
+- Git
+
+Vérifier que tout est bien installé :
+
+```bash
+python3 --version   # ou "python --version" sous Windows — doit afficher Python 3.12.x
+docker --version
+docker compose version
+```
+
+## Installation
+
+```bash
+# 1. Cloner le dépôt (si ce n'est pas déjà fait)
+git clone <url-du-depot>
+cd Journal_de_bord
+
+# 2. Démarrer la base de données (sous Windows : Docker Desktop doit être ouvert)
+docker compose up -d db
+
+# 3. Créer l'environnement virtuel et installer les dépendances
+cd backend
+python3 -m venv venv          # sous Windows : python -m venv venv
+
+source venv/bin/activate      # sous Windows : venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+## Démarrer le serveur
+
+```bash
+# Depuis backend/, avec l'environnement virtuel activé
+uvicorn main:app --reload
+```
+
+Si tout s'est bien passé, le dernier message ressemble à
+`Uvicorn running on http://127.0.0.1:8000`.
+
+## Comment tester
+
+Ouvrir **http://localhost:8000/docs** dans le navigateur. C'est l'interface
+générée automatiquement par FastAPI : chaque endpoint peut être testé en un
+clic, sans avoir besoin de Postman.
+
+Tester dans l'ordre :
+
+1. **GET `/api/health`** → doit renvoyer `{"status": "ok"}`. Si ça marche,
+   le serveur a bien démarré.
+2. **GET `/api/secteurs`** → doit renvoyer une liste de 5 secteurs (Pont,
+   Serre, Dortoirs, Machinerie, Laboratoire). Si ça marche, la connexion à
+   PostgreSQL et la création des tables fonctionnent.
+
+Si l'étape 2 échoue mais que l'étape 1 a marché, le problème vient de la
+connexion à la base — voir Dépannage ci-dessous.
+
+## Tout arrêter
+
+```bash
+docker compose down
+```
+
+(Les données de Postgres restent dans un volume Docker, elles ne sont pas
+perdues avec `down`. Pour tout effacer : `docker compose down -v`.)
+
+## Structure du projet
+
+```
+Journal_de_bord/
+├── config.yaml              # toute la configuration ajustable (rien en dur)
+├── docker-compose.yml       # services : db (Postgres), backend, ollama
+├── data/                    # images capturées, index astrometry.net (non versionné)
+└── backend/
+    ├── main.py              # démarrage de l'app + endpoints de test
+    ├── config.py            # lecture de config.yaml
+    ├── database.py          # connexion à Postgres
+    ├── models.py            # les 9 tables (section 8 du cahier des charges)
+    ├── schemas.py           # format d'entrée/sortie de l'API
+    ├── routers/              # ICI va chaque module (un fichier par module)
+    └── services/             # ICI va la logique de chaque module
+```
+
+## Dépannage
+
+| Problème | Cause probable |
+|---|---|
+| `docker compose up -d db` ne fait rien / erreur de connexion | Sous Windows : Docker Desktop n'est pas ouvert. Sous Linux : le service Docker n'est pas démarré (`sudo systemctl start docker`) |
+| `python --version` ouvre le Microsoft Store (Windows) | Python n'est pas vraiment installé, réinstaller depuis le lien ci-dessus |
+| `pip install` échoue | Vérifier que l'environnement virtuel est activé (le prompt doit commencer par `(venv)`) |
+| `/api/secteurs` renvoie une erreur de connexion à la base | Lancer `docker ps` et vérifier que le conteneur `journal-db` est `healthy` (peut prendre ~10s à démarrer) |

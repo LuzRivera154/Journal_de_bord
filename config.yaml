@@ -18,8 +18,9 @@ ollama:
 
 scheduler:
   enabled: true
-  observation_interval_minutes: 60   # OBS-01 : intervalle des prises de vue automatiques
-  journal_generation_hour: 22        # JRN-01 : heure fixe de génération quotidienne (0-23)
+  navigation_calculation_hour: 0 # NAV-01 : heure fixe du calcul de position quotidien (0-23)
+  observation_interval_minutes: 60 # OBS-01 : intervalle des prises de vue automatiques
+  journal_generation_hour: 22 # JRN-01 : heure fixe de génération quotidienne (0-23)
 
 alerts:
   # STA-05 : seuils déclenchant une alerte + incident automatique
@@ -29,7 +30,7 @@ alerts:
   humidite_max: 70.0
 
 navigation:
-  vitesse_defaut: 12.5   # unités de distance / jour
+  vitesse_defaut: 12.5 # unités de distance / jour
   position_initiale:
     x: 0.0
     y: 0.0
@@ -47,7 +48,7 @@ camera:
   source_image: null
 
 astrometry:
-  solve_field_path: "solve-field"   # binaire astrometry.net, doit être dans le PATH du conteneur
+  solve_field_path: "solve-field" # binaire astrometry.net, doit être dans le PATH du conteneur
   index_dir: "../data/astrometry_index"
   timeout_seconds: 60
 

@@ -4,7 +4,7 @@ Position du jour = position de la veille + vitesse * temps écoulé, dans la
 direction de la destination (cf. section 6 du cahier des charges).
 """
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from config import config
 from models import Position
@@ -56,3 +56,20 @@ def calculer_position_du_jour(db):
     db.commit()
     db.refresh(nouvelle_position)
     return nouvelle_position
+
+
+def calculer_distance_et_eta(position):
+    """Distance restante jusqu'à la destination, et date d'arrivée estimée
+    si le vaisseau continue à la même vitesse (NAV-04)."""
+    dx = DESTINATION["x"] - position.x
+    dy = DESTINATION["y"] - position.y
+    dz = DESTINATION["z"] - position.z
+    distance_restante = math.sqrt(dx**2 + dy**2 + dz**2)
+
+    if position.vitesse > 0:
+        jours_restants = distance_restante / position.vitesse
+        date_arrivee_estimee = position.date + timedelta(days=jours_restants)
+    else:
+        date_arrivee_estimee = None  # vitesse inconnue : impossible d'estimer
+
+    return distance_restante, date_arrivee_estimee

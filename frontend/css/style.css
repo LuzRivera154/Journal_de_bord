@@ -95,8 +95,20 @@ body {
   padding: 16px;
 }
 
-.panneau-tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.panneau-tete h2 { font-family: var(--police-titre); font-size: 15px; margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
+.panneau-tete { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  margin-bottom: 12px;
+}
+.panneau-tete h2 { 
+  font-family: var(--police-titre);
+  font-size: 15px; 
+  margin: 0; 
+  text-transform: uppercase;
+  letter-spacing: 0.1rem; 
+  color: var(--texte-discret);
+  }
 
 /* Pastille d'état générique (ex: méthode de calcul, statut d'un incident...)
    Ajoute ton propre data-<attribut>="valeur" + règle couleur si besoin,
@@ -142,10 +154,17 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .pastille[data-methode="recalage"] { background: var(--ok-fond); color: var(--ok); }
 .pastille[data-methode="estime"] { background: var(--attention-fond); color: var(--attention); }
 
-.donnees { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; }
-.donnees div { display: flex; flex-direction: column; gap: 2px; }
-.donnees dt { color: var(--texte-discret); font-size: 11px; text-transform: uppercase; }
-.donnees dd { margin: 0; font-family: var(--police-mono); font-size: 16px; }
+/* Liste "étiquette à gauche / valeur à droite", une ligne par donnée avec
+   un filet en bas — repris du style de la maquette. */
+.donnees { display: flex; flex-direction: column; margin: 0; }
+.donnees div {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--trait);
+}
+.donnees div:last-child { border-bottom: 0; }
+.donnees dt { color: var(--texte-discret); font-size: 13px; }
+.donnees dd { margin: 0; font-family: var(--police-mono); font-size: 14px; text-align: right; }
 
 .carte { width: 100%; height: auto; background: var(--fond); border: 1px solid var(--trait); border-radius: 8px; }
 

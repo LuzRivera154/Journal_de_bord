@@ -1,6 +1,6 @@
 """Schémas Pydantic : la forme des données qui entrent/sortent de l'API."""
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -70,12 +70,10 @@ class PositionOut(BaseModel):
     methode: str
 
 
-class NavigationStatus(BaseModel):
-    position_actuelle: PositionOut
-    trajet: List[PositionOut]
+class DestinationOut(BaseModel):
+    nom: str
     distance_restante: float
-    destination: str
-    eta_jours: float
+    date_arrivee_estimee: Optional[datetime]
 
 
 class ObservationOut(BaseModel):

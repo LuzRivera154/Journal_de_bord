@@ -4,6 +4,7 @@ genererBarreLaterale("navigation");
 
 const API_POSITIONS = "/api/navigation/positions";
 const API_CALCULER = "/api/navigation/calculer";
+const API_DESTINATION = "/api/navigation/destination";
 
 const elMessage = document.getElementById("message-etat");
 const elBoutonCalculer = document.getElementById("bouton-calculer");
@@ -33,6 +34,26 @@ function afficherPositionDuJour(position) {
   const pastille = document.getElementById("pastille-methode");
   pastille.textContent = position.methode;
   pastille.dataset.methode = position.methode;
+}
+
+// Distance restante et date d'arrivée estimée (US-3.4).
+function afficherDestination(destination) {
+  document.getElementById("dest-nom").textContent = destination.nom;
+  document.getElementById("dest-distance").textContent = formatNombre(destination.distance_restante);
+  document.getElementById("dest-arrivee").textContent = destination.date_arrivee_estimee
+    ? formatDate(destination.date_arrivee_estimee)
+    : "n/d";
+}
+
+async function chargerDestination() {
+  try {
+    const reponse = await fetch(API_DESTINATION);
+    if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
+    afficherDestination(await reponse.json());
+  } catch (erreur) {
+    console.error(erreur);
+    // Pas grave si ça échoue : le reste de la page (position, trajet) marche quand même.
+  }
 }
 
 function remplirTableau(positions) {
@@ -165,6 +186,7 @@ async function chargerPositions() {
     afficherPositionDuJour(positions[0]); // la plus récente est en premier
     remplirTableau(positions);
     dessinerTrajet(positions);
+    await chargerDestination();
   } catch (erreur) {
     afficherErreur("Impossible de contacter le serveur de bord. Vérifier que le backend tourne (voir README).");
     console.error(erreur);

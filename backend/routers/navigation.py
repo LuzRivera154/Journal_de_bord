@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 import models
 import schemas
+from config import config
 from database import get_db
-from services.navigation import calculer_position_du_jour
+from services.navigation import calculer_position_du_jour, calculer_distance_et_eta
 
 router = APIRouter(prefix="/api/navigation", tags=["navigation"])
 
@@ -25,3 +26,19 @@ def calculer_position(db: Session = Depends(get_db)):
 def lister_positions(db: Session = Depends(get_db)):
     """Historique des positions calculées, la plus récente en premier."""
     return db.query(models.Position).order_by(models.Position.date.desc()).all()
+
+
+@router.get("/destination", response_model=schemas.DestinationOut)
+def obtenir_destination(db: Session = Depends(get_db)):
+    """Distance restante et date d'arrivée estimée (NAV-04)."""
+    derniere_position = db.query(models.Position).order_by(models.Position.date.desc()).first()
+    if derniere_position is None:
+        derniere_position = calculer_position_du_jour(db)
+
+    distance_restante, date_arrivee_estimee = calculer_distance_et_eta(derniere_position)
+
+    return schemas.DestinationOut(
+        nom=config["navigation"]["destination"]["nom"],
+        distance_restante=distance_restante,
+        date_arrivee_estimee=date_arrivee_estimee,
+    )

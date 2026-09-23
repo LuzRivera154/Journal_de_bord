@@ -13,7 +13,11 @@ from database import engine, SessionLocal, Base, get_db
 import models
 import schemas
 from routers import navigation, stats
-from services.scheduler import demarrer_scheduler, modifier_intervalle_capture
+from services.scheduler import (
+    demarrer_scheduler,
+    modifier_intervalle_capture,
+    tache_capture_manuelle,
+)
 
 app = FastAPI(title=config["app"]["name"])
 
@@ -67,6 +71,11 @@ def changer_intervalle(minutes: int):
     modifier_intervalle_capture(minutes)
     return {"message": f"Intervalle modifié à {minutes} minutes"}
 
+
+# TODO FRONTEND : le bouton "Capture manuelle" devra appeler cette API.
+@app.post("/api/capture/manuelle")
+def capture_manuelle():
+    return tache_capture_manuelle()
 
 # Sert le tableau de bord (index.html, navigation.html, css/, js/).
 # Monté en dernier pour que les routes /api/* ci-dessus restent prioritaires.

@@ -13,6 +13,7 @@ from database import SessionLocal
 from services.navigation import calculer_position_du_jour
 from services.dht22 import enregistrer_lecture_dht22
 
+
 SCHEDULER_CONFIG = config["scheduler"]
 
 scheduler = BackgroundScheduler()
@@ -59,6 +60,26 @@ def tache_lecture_dht22():
         enregistrer_lecture_dht22(db)
     finally:
         db.close()
+def tache_capture_manuelle():
+    """Prend une photo manuelle et l'enregistre avec son horodatage."""
+
+    dossier = Path(config["camera"]["capture_dir"]) / "Manuelles"
+    dossier.mkdir(parents=True, exist_ok=True)
+
+    # TODO : remplacer la webcam de test par la caméra extérieure du projet
+    camera = cv2.VideoCapture(0)
+    succes, image = camera.read()
+    camera.release()
+
+    if not succes:
+        return {"success": False, "message": "Impossible de prendre la photo."}
+
+    horodatage = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    chemin = dossier / f"capture_{horodatage}.jpg"
+
+    cv2.imwrite(str(chemin), image)
+
+    return {"success": True, "chemin": str(chemin)}
 
 
 # TODO FRONTEND : ajouter un bouton permettant de modifier l'intervalle

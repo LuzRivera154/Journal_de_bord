@@ -11,6 +11,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from config import config
 from database import SessionLocal
 from services.navigation import calculer_position_du_jour
+from services.dht22 import enregistrer_lecture_dht22
 
 SCHEDULER_CONFIG = config["scheduler"]
 
@@ -51,6 +52,15 @@ def tache_capture_automatique():
     print(f"Capture enregistrée : {chemin}")
 
 
+def tache_lecture_dht22():
+    """Relève température et humidité du DHT22 (STA-01)."""
+    db = SessionLocal()
+    try:
+        enregistrer_lecture_dht22(db)
+    finally:
+        db.close()
+
+
 # TODO FRONTEND : ajouter un bouton permettant de modifier l'intervalle
 # Le bouton devra appeler cette API (PUT /api/scheduler/interval)
 # avec le nombre de minutes choisi par l'utilisateur
@@ -80,6 +90,14 @@ def demarrer_scheduler():
         "interval",
         minutes=SCHEDULER_CONFIG["observation_interval_minutes"],
         id="capture_automatique",
+        replace_existing=True,
+    )
+
+    scheduler.add_job(
+        tache_lecture_dht22,
+        "interval",
+        minutes=SCHEDULER_CONFIG["dht22_read_interval_minutes"],
+        id="lecture_dht22",
         replace_existing=True,
     )
     scheduler.start()

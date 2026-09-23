@@ -1,0 +1,153 @@
+/* ============================================================
+   BASE COMMUNE — utilisée par TOUTES les pages (index.html,
+   navigation.html, et celles qu'on ajoute après).
+   Si tu ajoutes une page, réutilise ce qu'il y a ici (.panneau,
+   .bouton, .note, table...) avant de recréer un style équivalent.
+   ============================================================ */
+
+:root {
+  --fond: #0A1119;
+  --panneau: #111B27;
+  --survol: #1E2C40;
+  --trait: #22324A;
+  --texte: #DCE5EF;
+  --texte-discret: #8CA0B8;
+  --accent: #8FB3FF;
+  --ok: #4CC08A;
+  --ok-fond: rgba(76, 192, 138, 0.13);
+  --attention: #E9A93A;
+  --attention-fond: rgba(233, 169, 58, 0.14);
+  --critique: #F0525A;
+  --critique-fond: rgba(240, 82, 90, 0.15);
+
+  --police-titre: "Saira Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --police-texte: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --police-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --rayon: 10px;
+  --rail: 88px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--police-texte);
+  font-size: 14px;
+}
+
+.app { min-height: 100vh; display: grid; grid-template-columns: var(--rail) 1fr; }
+
+@media (max-width: 700px) {
+  .app { grid-template-columns: 1fr; }
+  .rail { position: static; flex-direction: row; height: auto; overflow-x: auto; }
+}
+
+/* Barre latérale (générée par js/sidebar.js — commune à toutes les pages) */
+.rail {
+  background: var(--panneau);
+  border-right: 1px solid var(--trait);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 8px;
+}
+
+.rail-logo { width: 28px; height: 28px; fill: none; stroke: var(--accent); stroke-width: 1.6; margin-bottom: 12px; }
+
+.rail-bouton {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border-radius: 8px;
+  color: var(--texte-discret);
+  text-decoration: none;
+  font-size: 11px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.rail-bouton svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.rail-bouton:hover { background: var(--survol); color: var(--texte); }
+.rail-bouton[aria-current="page"] { background: var(--survol); color: var(--accent); }
+
+/* Structure générique de page (titre + panneaux) */
+.contenu { padding: 20px 24px 40px; }
+
+.entete-page { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.entete-page h1 { font-family: var(--police-titre); font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
+
+.note { color: var(--texte-discret); font-size: 12px; margin: 8px 0 0; }
+.note[hidden] { display: none; }
+.note.erreur { color: var(--critique); }
+
+.panneau {
+  background: var(--panneau);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 16px;
+}
+
+.panneau-tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.panneau-tete h2 { font-family: var(--police-titre); font-size: 15px; margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
+
+/* Pastille d'état générique (ex: méthode de calcul, statut d'un incident...)
+   Ajoute ton propre data-<attribut>="valeur" + règle couleur si besoin,
+   pas la peine de recréer la pastille elle-même. */
+.pastille {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 22px; padding-inline: 8px;
+  border-radius: 999px;
+  font-family: var(--police-mono); font-size: 11.5px; font-weight: 600; white-space: nowrap;
+  background: var(--survol); color: var(--texte-discret);
+}
+.pastille::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.tableau-conteneur { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-family: var(--police-mono); font-size: 13px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--trait); white-space: nowrap; }
+th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; font-size: 11px; }
+
+.bouton {
+  font-family: var(--police-texte);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--trait);
+  background: var(--survol);
+  color: var(--texte);
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.bouton:hover { background: var(--trait); }
+.bouton-principal { background: var(--accent); color: #0A1119; border-color: var(--accent); }
+.bouton-principal:hover { filter: brightness(1.08); }
+.bouton:disabled { opacity: 0.6; cursor: default; }
+
+
+/* ============================================================
+   NAVIGATION (navigation.html) — styles propres à cette page.
+   ============================================================ */
+
+.grille-nav { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 760px) { .grille-nav { grid-template-columns: 1fr; } }
+
+.pastille[data-methode="recalage"] { background: var(--ok-fond); color: var(--ok); }
+.pastille[data-methode="estime"] { background: var(--attention-fond); color: var(--attention); }
+
+.donnees { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; }
+.donnees div { display: flex; flex-direction: column; gap: 2px; }
+.donnees dt { color: var(--texte-discret); font-size: 11px; text-transform: uppercase; }
+.donnees dd { margin: 0; font-family: var(--police-mono); font-size: 16px; }
+
+.carte { width: 100%; height: auto; background: var(--fond); border: 1px solid var(--trait); border-radius: 8px; }
+
+
+

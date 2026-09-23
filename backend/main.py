@@ -4,6 +4,7 @@ aura son propre fichier dans routers/, à ajouter ici avec app.include_router().
 """
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -11,11 +12,11 @@ from config import config
 from database import engine, SessionLocal, Base, get_db
 import models
 import schemas
+from routers import navigation
+from services.scheduler import demarrer_scheduler
 
 app = FastAPI(title=config["app"]["name"])
 
-# Scheduler exécuté en arrière-plan
-scheduler = BackgroundScheduler()
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,23 +25,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# capture exécutée toutes les 60 min
-def test_capture():
-    print("Capture automatique")
+
+
+app.include_router(navigation.router)
+
 
 
 @app.on_event("startup")
 def au_demarrage():
     Base.metadata.create_all(bind=engine)
     _creer_secteurs_initiaux()
-
-    # Lance la capture selon l'intervalle défini dans config.yaml
-    scheduler.add_job(
-        test_capture,
-        "interval",
-        minutes=config["scheduler"]["observation_interval_minutes"],
-    )
-    scheduler.start()
+    demarrer_scheduler()
 
 
 def _creer_secteurs_initiaux():
@@ -55,6 +50,7 @@ def _creer_secteurs_initiaux():
         db.close()
 
 
+@app.get("/health")
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
@@ -63,3 +59,8 @@ def health():
 @app.get("/api/secteurs", response_model=list[schemas.SecteurOut])
 def lister_secteurs(db: Session = Depends(get_db)):
     return db.query(models.Secteur).all()
+
+
+# Sert le tableau de bord (index.html, navigation.html, css/, js/).
+# Monté en dernier pour que les routes /api/* ci-dessus restent prioritaires.
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")

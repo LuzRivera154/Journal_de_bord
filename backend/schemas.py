@@ -72,6 +72,9 @@ class PositionOut(BaseModel):
 
 class DestinationOut(BaseModel):
     nom: str
+    x: float
+    y: float
+    z: float
     distance_restante: float
     date_arrivee_estimee: Optional[datetime]
 

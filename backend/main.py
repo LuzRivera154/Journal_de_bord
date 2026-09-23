@@ -13,7 +13,7 @@ from database import engine, SessionLocal, Base, get_db
 import models
 import schemas
 from routers import navigation
-from services.scheduler import demarrer_scheduler
+from services.scheduler import demarrer_scheduler, modifier_intervalle_capture
 
 app = FastAPI(title=config["app"]["name"])
 
@@ -59,6 +59,12 @@ def health():
 @app.get("/api/secteurs", response_model=list[schemas.SecteurOut])
 def lister_secteurs(db: Session = Depends(get_db)):
     return db.query(models.Secteur).all()
+
+
+@app.put("/api/scheduler/interval")
+def changer_intervalle(minutes: int):
+    modifier_intervalle_capture(minutes)
+    return {"message": f"Intervalle modifié à {minutes} minutes"}
 
 
 # Sert le tableau de bord (index.html, navigation.html, css/, js/).

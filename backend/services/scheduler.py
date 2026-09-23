@@ -2,6 +2,10 @@
 de l'équipage (cf. NFR "Fonctionnement hors ligne" : tout tourne en local,
 rien ne dépend d'une requête extérieure pour se lancer).
 """
+import cv2
+from datetime import datetime
+from pathlib import Path
+
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from config import config
@@ -23,8 +27,40 @@ def tache_calcul_position():
 
 
 def tache_capture_automatique():
-    """Déclenche une capture automatique."""
-    print("Capture automatique")
+    """
+    Prend une photo et l'enregistre avec son horodatage.
+
+    NOTE : VideoCapture(0) utilise actuellement la webcam du PC pour les tests,modifier cette partie pour utiliser la caméra définitive du projet.
+    """
+
+    dossier = Path(config["camera"]["capture_dir"]) / "Automatiques"
+    dossier.mkdir(parents=True, exist_ok=True)
+
+    camera = cv2.VideoCapture(0)
+    succes, image = camera.read()
+    camera.release()
+
+    if not succes:
+        print("Erreur : impossible de prendre la photo.")
+        return
+
+    horodatage = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    chemin = dossier / f"capture_{horodatage}.jpg"
+
+    cv2.imwrite(str(chemin), image)
+    print(f"Capture enregistrée : {chemin}")
+
+
+# TODO FRONTEND : ajouter un bouton permettant de modifier l'intervalle
+# Le bouton devra appeler cette API (PUT /api/scheduler/interval)
+# avec le nombre de minutes choisi par l'utilisateur
+def modifier_intervalle_capture(minutes: int):
+    """Modifie l'intervalle des captures sans redémarrer le service."""
+    scheduler.reschedule_job(
+        "capture_automatique",
+        trigger="interval",
+        minutes=minutes,
+    )
 
 
 def demarrer_scheduler():

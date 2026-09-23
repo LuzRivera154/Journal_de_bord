@@ -136,7 +136,7 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
    NAVIGATION (navigation.html) — styles propres à cette page.
    ============================================================ */
 
-.grille-nav { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-bottom: 16px; }
+.grille-nav { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-bottom: 16px; }
 @media (max-width: 760px) { .grille-nav { grid-template-columns: 1fr; } }
 
 .pastille[data-methode="recalage"] { background: var(--ok-fond); color: var(--ok); }
@@ -150,9 +150,4 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .carte { width: 100%; height: auto; background: var(--fond); border: 1px solid var(--trait); border-radius: 8px; }
 
 
-/* ============================================================
-   TA PAGE ICI — ex: JOURNAL (journal.html)
-   Copie ce bandeau, mets le nom de ta page, et ajoute tes styles
-   en dessous. Ne touche pas à la section BASE COMMUNE plus haut
-   sauf si c'est vraiment générique et utile à toutes les pages.
-   ============================================================ */
+

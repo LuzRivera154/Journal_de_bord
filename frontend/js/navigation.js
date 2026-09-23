@@ -1,6 +1,7 @@
 // Page Navigation : appelle le backend (voir backend/routers/navigation.py)
 // et affiche la position du jour, le trajet et l'historique.
 genererBarreLaterale("navigation");
+genererEntete();
 
 const API_POSITIONS = "/api/navigation/positions";
 const API_CALCULER = "/api/navigation/calculer";
@@ -45,14 +46,19 @@ function afficherDestination(destination) {
     : "n/d";
 }
 
+// Retourne la destination (ou null si l'appel échoue), pour que la carte
+// puisse s'en servir en plus du panneau de texte.
 async function chargerDestination() {
   try {
     const reponse = await fetch(API_DESTINATION);
     if (!reponse.ok) throw new Error(`HTTP ${reponse.status}`);
-    afficherDestination(await reponse.json());
+    const destination = await reponse.json();
+    afficherDestination(destination);
+    return destination;
   } catch (erreur) {
     console.error(erreur);
     // Pas grave si ça échoue : le reste de la page (position, trajet) marche quand même.
+    return null;
   }
 }
 
@@ -87,11 +93,9 @@ function dessinerEtiquette(ctx, texte, x, y, largeurCanvas, decalage = 8) {
 // fonction est rappelée à chaque chargement des positions, donc la carte
 // reflète toujours la dernière position calculée (critère 2).
 //
-// Volontairement limité au style visuel (grille, graduations, étiquettes) :
-// pas de Soleil/destination nommés sur la carte, ça demanderait d'exposer
-// config.yaml → navigation.destination par une nouvelle route API, ce qui
-// est le travail de US-3.4, pas de celle-ci.
-function dessinerTrajet(positions) {
+// `destination` est optionnelle (peut être null si /api/navigation/destination
+// n'a pas répondu) : la carte fonctionne quand même, juste sans ce point-là.
+function dessinerTrajet(positions, destination) {
   const canvas = document.getElementById("carte");
   const ctx = canvas.getContext("2d");
   const largeur = canvas.width, hauteur = canvas.height;
@@ -104,6 +108,10 @@ function dessinerTrajet(positions) {
 
   const xs = trajet.map((p) => p.x);
   const ys = trajet.map((p) => p.y);
+  if (destination) {
+    xs.push(destination.x);
+    ys.push(destination.y);
+  }
   const margeGauche = 24, margeDroite = 24, margeHaut = 20, margeBas = 34;
   const minX = Math.min(...xs, 0), maxX = Math.max(...xs, 0);
   const minY = Math.min(...ys, 0), maxY = Math.max(...ys, 0);
@@ -143,12 +151,12 @@ function dessinerTrajet(positions) {
   });
   ctx.stroke();
 
-  // Départ (point clair, étiqueté)
+  // Départ (point doré façon "soleil", étiqueté)
   const depart = trajet[0];
   const xDepart = versEcranX(depart.x), yDepart = versEcranY(depart.y);
-  ctx.fillStyle = "#8CA0B8";
+  ctx.fillStyle = "#F5C866";
   ctx.beginPath();
-  ctx.arc(xDepart, yDepart, 4, 0, Math.PI * 2);
+  ctx.arc(xDepart, yDepart, 6, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#DCE5EF";
   ctx.font = "11px 'IBM Plex Sans', sans-serif";
@@ -166,9 +174,31 @@ function dessinerTrajet(positions) {
   ctx.beginPath();
   ctx.arc(xAct, yAct, 5, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#DCE5EF";
+  ctx.fillStyle = "#8FB3FF";
   ctx.font = "600 11px 'IBM Plex Sans', sans-serif";
   dessinerEtiquette(ctx, "Position actuelle", xAct, yAct, largeur, 13);
+
+  // Destination (point + nom + ligne pointillée = route prévue, pas encore parcourue)
+  if (destination) {
+    const xDest = versEcranX(destination.x), yDest = versEcranY(destination.y);
+
+    ctx.strokeStyle = "#8CA0B8";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(xAct, yAct);
+    ctx.lineTo(xDest, yDest);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "#F0525A";
+    ctx.beginPath();
+    ctx.arc(xDest, yDest, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#DCE5EF";
+    ctx.font = "11px 'IBM Plex Sans', sans-serif";
+    dessinerEtiquette(ctx, destination.nom, xDest, yDest, largeur);
+  }
 }
 
 async function chargerPositions() {
@@ -185,8 +215,8 @@ async function chargerPositions() {
     elMessage.hidden = true;
     afficherPositionDuJour(positions[0]); // la plus récente est en premier
     remplirTableau(positions);
-    dessinerTrajet(positions);
-    await chargerDestination();
+    const destination = await chargerDestination();
+    dessinerTrajet(positions, destination);
   } catch (erreur) {
     afficherErreur("Impossible de contacter le serveur de bord. Vérifier que le backend tourne (voir README).");
     console.error(erreur);

@@ -37,8 +37,12 @@ def obtenir_destination(db: Session = Depends(get_db)):
 
     distance_restante, date_arrivee_estimee = calculer_distance_et_eta(derniere_position)
 
+    destination = config["navigation"]["destination"]
     return schemas.DestinationOut(
-        nom=config["navigation"]["destination"]["nom"],
+        nom=destination["nom"],
+        x=destination["x"],
+        y=destination["y"],
+        z=destination["z"],
         distance_restante=distance_restante,
         date_arrivee_estimee=date_arrivee_estimee,
     )

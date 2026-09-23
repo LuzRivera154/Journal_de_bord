@@ -22,17 +22,50 @@ function genererBarreLaterale(pageActive) {
   const conteneur = document.getElementById("rail");
   if (!conteneur) return;
 
-  const logo = `
-    <svg class="rail-logo" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="14.5"/>
-      <path d="M16 27V8M16 14l-6-5M16 14l6-5M16 20l-5-3.5M16 20l5-3.5M11 27h10"/>
-    </svg>`;
-
+  // Le logo va dans le header (genererEntete()), pas ici — pas la peine
+  // de l'afficher deux fois.
   const boutons = PAGES_RAIL.map((page) => `
     <a class="rail-bouton" href="${page.href}" ${page.id === pageActive ? 'aria-current="page"' : ""}>
       <svg viewBox="0 0 24 24" aria-hidden="true">${page.icone}</svg>
       <span>${page.label}</span>
     </a>`).join("");
 
-  conteneur.innerHTML = logo + boutons;
+  conteneur.innerHTML = boutons;
+}
+
+// En-tête du haut, commune à toutes les pages : logo + nom + heure en direct.
+// Volontairement limité au marco visuel pour l'instant : pas de "jour de
+// mission" (il faudrait une date de départ dans config.yaml) ni de bouton
+// crise (c'est le travail de l'épic 7, pas encore commencé).
+function genererEntete() {
+  const conteneur = document.getElementById("entete");
+  if (!conteneur) return;
+
+  conteneur.innerHTML = `
+
+    <div class="marque">
+      <svg class="marque-logo" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14.5"/>
+        <path d="M16 27V8M16 14l-6-5M16 14l6-5M16 20l-5-3.5M16 20l5-3.5M11 27h10"/>
+      </svg>
+      
+      <div>
+        <div class="marque-nom">Utilisateur</div>
+        <div class="marque-sous">Journal de bord</div>
+      </div>
+    </div>
+    <div class="entete-heure" >
+    <p class="entete-heure-texte">HEURE BORD</p>
+    <span id="entete-heure"></span>
+    </div>
+  `;
+
+  mettreAJourHeure();
+  setInterval(mettreAJourHeure, 1000);
+}
+
+function mettreAJourHeure() {
+  const el = document.getElementById("entete-heure");
+  if (!el) return;
+  el.textContent = new Date().toLocaleTimeString("fr-FR");
 }

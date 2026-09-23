@@ -5,6 +5,7 @@ aura son propre fichier dans routers/, à ajouter ici avec app.include_router().
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from config import config
 from database import engine, SessionLocal, Base, get_db
@@ -13,6 +14,9 @@ import schemas
 
 app = FastAPI(title=config["app"]["name"])
 
+# Scheduler exécuté en arrière-plan
+scheduler = BackgroundScheduler()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,11 +24,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# capture exécutée toutes les 60 min
+def test_capture():
+    print("Capture automatique")
+
 
 @app.on_event("startup")
 def au_demarrage():
     Base.metadata.create_all(bind=engine)
     _creer_secteurs_initiaux()
+
+    # Lance la capture selon l'intervalle défini dans config.yaml
+    scheduler.add_job(
+        test_capture,
+        "interval",
+        minutes=config["scheduler"]["observation_interval_minutes"],
+    )
+    scheduler.start()
 
 
 def _creer_secteurs_initiaux():

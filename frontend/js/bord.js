@@ -128,37 +128,41 @@ document.getElementById("choix-courbe").addEventListener("click", (evenement) =>
 
 async function chargerDernieresMesuresDht22() {
   try {
-    const [reponseTemp, reponseHumidite] = await Promise.all([
-      fetch("/api/stats/mesures?type=temperature"),
-      fetch("/api/stats/mesures?type=humidite"),
-    ]);
-    const temperatures = await reponseTemp.json();
-    const humidites = await reponseHumidite.json();
+    const reponse = await fetch("/api/stats/dernieres-mesures");
+    const mesures = await reponse.json();
 
-    if (temperatures.length === 0 || humidites.length === 0) {
-      return; // pas encore de relevé, on laisse "n/d" affiché
-    }
+    const temperature = mesures.find((m) => m.type === "temperature");
+    const humidite = mesures.find((m) => m.type === "humidite");
 
-    const derniereTemperature = temperatures[0]; // la plus récente est en premier
-    const derniereHumidite = humidites[0];
+    if (!temperature || !humidite) return;
 
-    document.getElementById("dht22-temperature").textContent = `${derniereTemperature.valeur} ${derniereTemperature.unite}`;
-    document.getElementById("dht22-humidite").textContent = `${derniereHumidite.valeur} ${derniereHumidite.unite}`;
-    document.getElementById("dht22-date").textContent = formatDate(derniereTemperature.horodatage);
+    document.getElementById("dht22-temperature").textContent =
+      `${temperature.valeur} ${temperature.unite}`;
+
+    document.getElementById("dht22-humidite").textContent =
+      `${humidite.valeur} ${humidite.unite}`;
+
+    document.getElementById("dht22-date").textContent =
+      formatDate(temperature.horodatage);
 
     const pastille = document.getElementById("pastille-source-dht22");
-    pastille.textContent = derniereTemperature.source;
-    pastille.dataset.source = derniereTemperature.source;
+    pastille.textContent = temperature.source;
+    pastille.dataset.source = temperature.source;
 
-    // Les mêmes valeurs alimentent les fiches du haut.
-    document.getElementById("fiche-temperature").textContent = derniereTemperature.valeur + " " + derniereTemperature.unite;
-    document.getElementById("fiche-temperature-sous").textContent = "capteur DHT22, secteur Pont";
-    document.getElementById("fiche-humidite").textContent = derniereHumidite.valeur + " " + derniereHumidite.unite;
-    document.getElementById("fiche-humidite-sous").textContent = "capteur DHT22, secteur Pont";
+    document.getElementById("fiche-temperature").textContent =
+      temperature.valeur + " " + temperature.unite;
+
+    document.getElementById("fiche-temperature-sous").textContent =
+      "capteur DHT22, secteur Pont";
+
+    document.getElementById("fiche-humidite").textContent =
+      humidite.valeur + " " + humidite.unite;
+
+    document.getElementById("fiche-humidite-sous").textContent =
+      "capteur DHT22, secteur Pont";
+
   } catch (erreur) {
     console.error(erreur);
-    // Pas de message d'erreur bloquant ici : la page reste utilisable, elle
-    // réessaiera au prochain rafraîchissement (cf. NFR "Résilience").
   }
 }
 

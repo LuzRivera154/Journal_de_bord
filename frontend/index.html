@@ -11,16 +11,119 @@
 </head>
 <body>
 <div class="app">
+  <header class="entete" id="entete"></header>
   <nav class="rail" id="rail" aria-label="Sections du tableau de bord"></nav>
 
   <main class="contenu">
     <div class="entete-page">
       <h1>Bord</h1>
     </div>
-    <p class="note">Cette page n'est pas encore construite — voir <a href="navigation.html" style="color:var(--accent)">Navigation</a> en attendant.</p>
+    <p class="subtitule">En dessous : les dernières mesures du capteur DHT22 (STA-01), pour vérifier que ça marche.</p>
+
+    <div class="grille-fiches">
+      <div class="fiche" id="fiche-oxygene-carte">
+        <div class="fiche-tete">
+          <span class="fiche-libelle">Oxygène</span>
+          <span class="pastille" id="fiche-oxygene-pastille" data-gravite="critique" hidden>Critique</span>
+        </div>
+        <div class="fiche-valeur" id="fiche-oxygene">n/d</div>
+        <p class="fiche-sous">moyenne sur les secteurs</p>
+      </div>
+      <div class="fiche" id="fiche-temperature-carte">
+        <div class="fiche-tete">
+          <span class="fiche-libelle">Température</span>
+          <span class="pastille" id="fiche-temperature-pastille" data-gravite="critique" hidden>Critique</span>
+        </div>
+        <div class="fiche-valeur" id="fiche-temperature">n/d</div>
+        <p class="fiche-sous" id="fiche-temperature-sous"></p>
+      </div>
+      <div class="fiche" id="fiche-humidite-carte">
+        <div class="fiche-tete">
+          <span class="fiche-libelle">Humidité</span>
+          <span class="pastille" id="fiche-humidite-pastille" data-gravite="critique" hidden>Critique</span>
+        </div>
+        <div class="fiche-valeur" id="fiche-humidite">n/d</div>
+        <p class="fiche-sous" id="fiche-humidite-sous"></p>
+      </div>
+      <div class="fiche">
+        <span class="fiche-libelle">Équipage</span>
+        <div class="fiche-valeur" id="fiche-population">n/d</div>
+        <p class="fiche-sous" id="fiche-population-sous"></p>
+      </div>
+    </div>
+
+    <div class="grille-bord">
+      <section class="panneau large">
+        <div class="panneau-tete">
+          <h2>Atmosphère sur 24 heures</h2>
+          <div class="segments" id="choix-courbe">
+            <button type="button" data-type="temperature" aria-pressed="true">Température</button>
+            <button type="button" data-type="humidite" aria-pressed="false">Humidité</button>
+            <button type="button" data-type="oxygene" aria-pressed="false">Oxygène</button>
+          </div>
+        </div>
+        <div class="courbe"><canvas id="courbe-bord"></canvas></div>
+        <p class="note">Capteur DHT22, secteur <span id="courbe-secteur"></span> — relevé toutes les <span id="courbe-intervalle"></span> minutes.</p>
+      </section>
+
+      <div class="colonne-bord">
+        <section class="panneau">
+          <div class="panneau-tete"><h2>Alertes</h2><span class="compteur" id="compteur-alertes"></span></div>
+          <ul class="liste-alertes" id="liste-alertes"></ul>
+        </section>
+
+        <section class="panneau">
+          <div class="panneau-tete"><h2>Dernier relevé</h2><span class="pastille" id="pastille-source-dht22"></span></div>
+          <dl class="donnees">
+            <div><dt>Température</dt><dd id="dht22-temperature">n/d</dd></div>
+            <div><dt>Humidité</dt><dd id="dht22-humidite">n/d</dd></div>
+            <div><dt>Heure</dt><dd id="dht22-date">n/d</dd></div>
+          </dl>
+        </section>
+      </div>
+    </div>
+
+    <div class="grille-bas">
+      <section class="panneau">
+        <div class="panneau-tete"><h2>Trajet</h2><a class="bouton bouton-petit" href="navigation.html">Carte</a></div>
+        <div class="trajet-pourcent" id="trajet-pourcentage">n/d</div>
+        <div class="jauge"><span id="trajet-barre" style="width:0%"></span></div>
+        <div class="trajet-bornes"><span>Départ</span><span id="trajet-destination-nom"></span></div>
+        <dl class="donnees" style="margin-top:12px">
+          <div><dt>Parcouru</dt><dd id="trajet-parcouru">n/d</dd></div>
+          <div><dt>Restant</dt><dd id="trajet-restant">n/d</dd></div>
+          <div><dt>Arrivée estimée</dt><dd id="trajet-arrivee">n/d</dd></div>
+        </dl>
+      </section>
+
+      <section class="panneau">
+        <div class="panneau-tete"><h2>Dernier journal</h2><a class="bouton bouton-petit" href="journal.html">Lire le journal</a></div>
+        <p class="note" id="journal-meta"></p>
+        <div class="journal-extrait" id="journal-extrait">
+          <p class="vide">Aucun journal généré pour l'instant.</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="grille-bord" style="margin-top:16px">
+      <section class="panneau large">
+        <div class="panneau-tete"><h2>Secteurs</h2><span class="compteur" id="compteur-secteurs"></span></div>
+        <div class="grille-secteurs" id="grille-secteurs">
+          <p class="vide">Aucune donnée de secteur pour l'instant.</p>
+        </div>
+      </section>
+
+      <section class="panneau">
+        <div class="panneau-tete"><h2>Réserves et besoins</h2></div>
+        <ul class="liste-reserves" id="liste-reserves">
+          <li><p class="vide">Aucune donnée pour l'instant.</p></li>
+        </ul>
+      </section>
+    </div>
   </main>
 </div>
 <script src="js/sidebar.js"></script>
-<script>genererBarreLaterale("bord");</script>
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/bord.js"></script>
 </body>
 </html>

@@ -35,3 +35,10 @@ def get_database_url():
         "Configuration de la base de données manquante. Copier .env.example "
         "vers .env (à la racine du projet) et le compléter."
     )
+
+
+def get_ollama_base_url():
+    # Dans Docker, docker-compose.yml fournit l'adresse du service "ollama".
+    # En local (hors conteneur), on retombe sur celle de config.yaml
+    # ("localhost", puisque Ollama tourne alors directement sur la machine).
+    return os.environ.get("OLLAMA_BASE_URL", config["ollama"]["base_url"])

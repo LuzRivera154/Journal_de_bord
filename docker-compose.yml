@@ -27,6 +27,9 @@ services:
     environment:
       - CONFIG_PATH=/app/config.yaml
       - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # "ollama" = nom du service Docker, pas "localhost" (le backend et
+      # Ollama sont deux conteneurs séparés, localhost ne suffit pas).
+      - OLLAMA_BASE_URL=http://ollama:11434
     depends_on:
       db:
         condition: service_healthy

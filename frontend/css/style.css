@@ -36,18 +36,91 @@ body {
   background: var(--fond);
   color: var(--texte);
   font-family: var(--police-texte);
-  font-size: 14px;
+  font-size: 18px;
 }
 
-.app { min-height: 100vh; display: grid; grid-template-columns: var(--rail) 1fr; }
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+/* Écran assez grand : l'entête et le rail restent immobiles, seul le
+   contenu central défile. Pas de "position: fixed" ici — un élément fixed
+   sort de la grille et casse tout le placement (rail qui remonte, contenu
+   caché dessous...). À la place, .app prend toute la hauteur de l'écran et
+   c'est .contenu qui défile tout seul à l'intérieur. */
+@media (min-width: 701px) {
+  .app { height: 100vh; overflow: hidden; }
+  .rail { min-height: 0; overflow-y: auto; }
+  .contenu { min-height: 0; overflow-y: auto; }
+}
 
 @media (max-width: 700px) {
   .app { grid-template-columns: 1fr; }
   .rail { position: static; flex-direction: row; height: auto; overflow-x: auto; }
 }
 
+/* En-tête (générée par js/sidebar.js → genererEntete() — commune à toutes les pages) */
+.entete {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--panneau);
+  border-bottom: 1px solid var(--trait);
+}
+
+.marque { display: flex; align-items: center; gap: 10px; }
+.marque-logo { width: 40px; height: 40px; fill: none; stroke: var(--accent); stroke-width: 1.6; }
+.marque-nom { font-family: var(--police-titre); font-weight: 700; font-size: 18px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
+.marque-sous { font-size: 16px; color: var(--texte-discret); }
+
+.entete-droite { display: flex; align-items: center; gap: 20px; }
+.entete-infos { display: flex; align-items: center; gap: 24px; }
+
+.bouton-crise {
+  font-family: var(--police-texte);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--critique);
+  background: none;
+  color: var(--critique);
+  padding: 9px 16px;
+  cursor: pointer;
+}
+.bouton-crise:hover { background: var(--critique-fond); }
+.bouton-crise.actif { background: var(--critique); color: #0A1119; }
+.bouton-crise:disabled { opacity: 0.6; cursor: default; }
+
+.banniere-crise {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--critique);
+  border-radius: var(--rayon);
+  background: var(--critique-fond);
+}
+.banniere-crise-point { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--critique); }
+.banniere-crise strong { color: var(--critique); font-family: var(--police-titre); letter-spacing: 0.05em; }
+.banniere-crise p { margin: 2px 0 0; font-size: 14px; color: var(--texte); }
+.banniere-crise .bouton { flex-shrink: 0; margin-left: auto; }
+.entete-heure { font-family: var(--police-mono); color: var(--texte-discret); display:flex; align-items: center; flex-direction: column; }
+.entete-heure-texte {
+  margin: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.entete-heure span { font-size: 14px; color: var(--texte); }
 /* Barre latérale (générée par js/sidebar.js — commune à toutes les pages) */
 .rail {
+  grid-row: 2;
+  grid-column: 1;
   background: var(--panneau);
   border-right: 1px solid var(--trait);
   display: flex;
@@ -56,8 +129,6 @@ body {
   gap: 4px;
   padding: 16px 8px;
 }
-
-.rail-logo { width: 28px; height: 28px; fill: none; stroke: var(--accent); stroke-width: 1.6; margin-bottom: 12px; }
 
 .rail-bouton {
   width: 100%;
@@ -69,7 +140,7 @@ body {
   border-radius: 8px;
   color: var(--texte-discret);
   text-decoration: none;
-  font-size: 11px;
+  font-size: 14px;
   border: none;
   background: none;
   cursor: pointer;
@@ -81,13 +152,13 @@ body {
 /* Structure générique de page (titre + panneaux) */
 .contenu { padding: 20px 24px 40px; }
 
-.entete-page { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-.entete-page h1 { font-family: var(--police-titre); font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: 0.02em; }
+.entete-page { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.entete-page h1 { font-family: var(--police-titre); font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: 0.08em; }
 
-.note { color: var(--texte-discret); font-size: 12px; margin: 8px 0 0; }
+.note { color: var(--texte-discret); font-size: 16px; margin: 8px 0 0; }
 .note[hidden] { display: none; }
 .note.erreur { color: var(--critique); }
-
+.subtitule{ color: var(--texte-discret) ; font-size: 16px; }
 .panneau {
   background: var(--panneau);
   border: 1px solid var(--trait);
@@ -121,11 +192,48 @@ body {
   background: var(--survol); color: var(--texte-discret);
 }
 .pastille::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pastille[hidden] { display: none; }
+
+/* Pastilles d'onglets (ex: choix Température / Humidité au-dessus d'une courbe) */
+.segments { display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 8px; background: var(--fond); border: 1px solid var(--trait); }
+.segments button {
+  min-height: 32px; padding-inline: 12px;
+  border: 0; border-radius: 6px; background: none;
+  color: var(--texte-discret); cursor: pointer; font-size: 13px; font-weight: 500;
+  font-family: var(--police-texte);
+}
+.segments button:hover { color: var(--texte); }
+.segments button[aria-pressed="true"] { background: var(--survol); color: var(--texte); }
+
+/* Courbe SVG (voir js/graphiques.js) */
+.courbe { position: relative; height: 250px; }
+.courbe canvas { display: block; width: 100% !important; height: 100% !important; }
+.infobulle {
+  position: absolute; pointer-events: none;
+  padding: 4px 8px; border-radius: 6px;
+  background: var(--survol); border: 1px solid var(--trait);
+  font-family: var(--police-mono); font-size: 16px; white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+.vide { margin: 0; padding: 12px 0; color: var(--texte-discret); font-size: 18px; }
 
 .tableau-conteneur { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-family: var(--police-mono); font-size: 13px; }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--trait); white-space: nowrap; }
 th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; font-size: 11px; }
+
+/* Liste "étiquette à gauche / valeur à droite", une ligne par donnée avec
+   un filet en bas — repris du style de la maquette. Utilisée par plusieurs
+   pages (Bord, Navigation...), donc dans la base commune. */
+.donnees { display: flex; flex-direction: column; margin: 0; }
+.donnees div {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--trait);
+}
+.donnees div:last-child { border-bottom: 0; }
+.donnees dt { color: var(--texte-discret); font-size: 13px; }
+.donnees dd { margin: 0; font-family: var(--police-mono); font-size: 18px; text-align: right; }
 
 .bouton {
   font-family: var(--police-texte);
@@ -142,6 +250,7 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .bouton-principal { background: var(--accent); color: #0A1119; border-color: var(--accent); }
 .bouton-principal:hover { filter: brightness(1.08); }
 .bouton:disabled { opacity: 0.6; cursor: default; }
+.bouton-petit { min-height: 32px; padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; }
 
 
 /* ============================================================
@@ -154,19 +263,260 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .pastille[data-methode="recalage"] { background: var(--ok-fond); color: var(--ok); }
 .pastille[data-methode="estime"] { background: var(--attention-fond); color: var(--attention); }
 
-/* Liste "étiquette à gauche / valeur à droite", une ligne par donnée avec
-   un filet en bas — repris du style de la maquette. */
-.donnees { display: flex; flex-direction: column; margin: 0; }
-.donnees div {
-  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--trait);
-}
-.donnees div:last-child { border-bottom: 0; }
-.donnees dt { color: var(--texte-discret); font-size: 13px; }
-.donnees dd { margin: 0; font-family: var(--police-mono); font-size: 14px; text-align: right; }
-
 .carte { width: 100%; height: auto; background: var(--fond); border: 1px solid var(--trait); border-radius: 8px; }
 
+
+/* ============================================================
+   BORD (index.html) — styles propres à cette page.
+   ============================================================ */
+
+.pastille[data-source="reelle"] { background: var(--ok-fond); color: var(--ok); }
+.pastille[data-source="simulee"] { background: var(--attention-fond); color: var(--attention); }
+
+/* Petites fiches d'indicateurs en haut de page (repris du style de la maquette) */
+.grille-fiches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 920px) { .grille-fiches { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 500px) { .grille-fiches { grid-template-columns: 1fr; } }
+
+.fiche {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 16px;
+  background: var(--panneau);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.fiche.critique { background: var(--critique-fond); border-color: var(--critique); }
+.fiche-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fiche-libelle { font-size: 12px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--texte-discret); }
+.fiche-valeur { font-family: var(--police-mono); font-size: 30px; font-weight: 500; line-height: 1.15; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fiche-valeur small { margin-left: 4px; font-size: 14px; font-weight: 400; font-family: var(--police-texte); color: var(--texte-discret); }
+.fiche-sous { margin: 0; font-size: 12px; color: var(--texte-discret); }
+
+.grille-bord { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grille-bord .large { grid-column: span 2; }
+@media (max-width: 920px) { .grille-bord { grid-template-columns: 1fr; } .grille-bord .large { grid-column: auto; } }
+
+/* Colonne de panneaux empilés (ex : Alertes + Dernier relevé à côté de la
+   courbe, sur le Bord). Réutilisable partout où .grille-bord sert. */
+.colonne-bord { display: flex; flex-direction: column; gap: 16px; }
+.compteur { font-family: var(--police-mono); font-size: 13px; color: var(--texte-discret); }
+
+.liste-alertes { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.alerte {
+  display: grid; grid-template-columns: 10px 1fr; column-gap: 10px;
+  padding: 10px; border-radius: 8px;
+}
+.alerte-point { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--attention); }
+.alerte-titre { grid-column: 2; font-size: 15px; font-weight: 600; }
+.alerte-texte { grid-column: 2; font-size: 13px; color: var(--texte-discret); }
+
+/* Fond + bordure de couleur selon la gravité — même logique que .fiche.critique. */
+.alerte[data-gravite="faible"] { background: var(--survol); }
+.alerte[data-gravite="faible"] .alerte-point { background: var(--accent); }
+
+.alerte[data-gravite="moyenne"] { background: var(--attention-fond); border: 1px solid var(--attention); }
+.alerte[data-gravite="moyenne"] .alerte-point { background: var(--attention); }
+.alerte[data-gravite="moyenne"] .alerte-titre { color: var(--attention); }
+
+.alerte[data-gravite="critique"] { background: var(--critique-fond); border: 1px solid var(--critique); }
+.alerte[data-gravite="critique"] .alerte-point { background: var(--critique); }
+.alerte[data-gravite="critique"] .alerte-titre { color: var(--critique); }
+
+.grille-bas { display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 800px) { .grille-bas { grid-template-columns: 1fr; } }
+
+/* Résumé du trajet (renvoie vers la carte complète sur navigation.html) */
+.trajet-pourcent { font-family: var(--police-mono); font-size: 28px; font-weight: 500; }
+.trajet-pourcent::after { content: " % du trajet"; font-size: 13px; font-weight: 400; color: var(--texte-discret); }
+.jauge { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--fond); overflow: hidden; }
+.jauge span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.jauge[data-niveau="ok"] span { background: var(--ok); }
+.jauge[data-niveau="attention"] span { background: var(--attention); }
+.jauge[data-niveau="critique"] span { background: var(--critique); }
+
+/* Panneau "Secteurs" du Bord */
+.grille-secteurs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .grille-secteurs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .grille-secteurs { grid-template-columns: 1fr; } }
+
+.carte-secteur { padding: 12px 14px; background: var(--fond); border: 1px solid var(--trait); border-radius: 8px; }
+.carte-secteur-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.carte-secteur-tete strong { font-size: 15px; }
+
+.donnees-secteur { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin: 0; }
+.donnees-secteur div { display: flex; justify-content: space-between; gap: 8px; }
+.donnees-secteur dt { color: var(--texte-discret); font-size: 12px; }
+.donnees-secteur dd { margin: 0; font-family: var(--police-mono); font-size: 13px; }
+
+.pastille[data-statut-secteur="nominal"] { background: var(--ok-fond); color: var(--ok); }
+.pastille[data-statut-secteur="maintenance"] { background: var(--survol); color: var(--accent); }
+
+/* Panneau "Réserves et besoins" du Bord */
+.liste-reserves { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.element-reserve-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 14px; }
+.element-reserve-jours { font-family: var(--police-mono); color: var(--texte-discret); }
+.element-reserve .note { margin: 6px 0 0; font-size: 12px; }
+.trajet-bornes { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: var(--texte-discret); }
+
+/* Texte du journal : les "## " et "- " du modèle sont transformés en HTML
+   par js/bord.js (voir formaterTexteJournal), stylés ici. */
+.journal-extrait h3 { margin: 16px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.journal-extrait h3:first-child { margin-top: 0; }
+.journal-extrait p { margin: 0 0 8px; font-size: 14px; }
+.journal-extrait ul { margin: 0 0 8px; padding-left: 20px; }
+.journal-extrait li { margin-bottom: 4px; font-size: 14px; }
+.journal-extrait .extrait-suite { margin: 0; color: var(--texte-discret); letter-spacing: 0.15em; }
+
+
+/* ============================================================
+   JOURNAL (journal.html) — styles propres à cette page.
+   ============================================================ */
+
+.grille-journal { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2.4fr); gap: 16px; align-items: start; }
+@media (max-width: 800px) { .grille-journal { grid-template-columns: 1fr; } }
+
+.astuce-recherche {
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--survol);
+  color: var(--texte-discret);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.recherche-journal { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--trait); }
+.recherche-journal-boutons { display: flex; gap: 8px; margin-top: 4px; }
+.recherche-journal-boutons .bouton { flex: 1; }
+
+.liste-journaux { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.element-liste {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%; padding: 10px 12px;
+  text-align: left; cursor: pointer;
+  background: none; border: 1px solid transparent; border-radius: 8px;
+  color: var(--texte);
+  font-family: var(--police-texte);
+}
+.element-liste:hover { background: var(--survol); }
+.element-liste[aria-current="true"] { background: var(--survol); border-color: var(--trait); }
+.element-titre { font-weight: 600; font-size: 13px; }
+.element-sous { font-size: 12px; color: var(--texte-discret); }
+
+.journal-article { padding: 24px 28px; }
+.journal-entete { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--trait); }
+.journal-entete h1 { font-family: var(--police-titre); font-size: 22px; margin: 0; text-transform: none; letter-spacing: normal; }
+.journal-meta { margin: 4px 0 0; font-size: 12px; color: var(--texte-discret); }
+.journal-corps { max-width: 68ch; }
+.journal-corps h3 { margin: 20px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.journal-corps h3:first-child { margin-top: 0; }
+.journal-corps p { margin: 0 0 8px; font-size: 14px; }
+.journal-corps ul { margin: 0 0 8px; padding-left: 20px; }
+.journal-corps li { margin-bottom: 4px; font-size: 14px; }
+.note-equipage { margin-top: 16px; padding: 10px 12px; border-radius: 8px; background: var(--survol); font-size: 14px; }
+.note-equipage span { display: block; font-size: 12px; color: var(--texte-discret); margin-bottom: 2px; }
+
+
+/* ============================================================
+   INCIDENTS (incidents.html) — styles propres à cette page.
+   ============================================================ */
+
+/* La Description est la seule colonne où on veut que le texte revienne à
+   la ligne (le reste du tableau garde le white-space: nowrap commun). */
+td.col-description { white-space: normal; min-width: 220px; }
+
+.pastille[data-gravite="faible"] { background: var(--survol); color: var(--accent); }
+.pastille[data-gravite="moyenne"] { background: var(--attention-fond); color: var(--attention); }
+.pastille[data-gravite="critique"] { background: var(--critique-fond); color: var(--critique); }
+
+.pastille[data-statut-incident="ouvert"] { background: var(--attention-fond); color: var(--attention); }
+.pastille[data-statut-incident="en_cours"] { background: var(--survol); color: var(--accent); }
+.pastille[data-statut-incident="resolu"] { background: var(--ok-fond); color: var(--ok); }
+
+.pastille[data-statut-maintenance="en_cours"] { background: var(--survol); color: var(--accent); }
+.pastille[data-statut-maintenance="terminee"] { background: var(--ok-fond); color: var(--ok); }
+
+/* Formulaire "Déclarer un incident" — premier formulaire du site, la base
+   commune (.panneau, .bouton...) n'avait pas encore de style pour les champs. */
+.champs-cote-a-cote { display: flex; gap: 12px; }
+.champs-cote-a-cote .champ { flex: 1; }
+
+.champ { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 13px; color: var(--texte-discret); }
+.champ:last-of-type { margin-bottom: 0; }
+
+.champ select,
+.champ textarea,
+.champ input {
+  font-family: var(--police-texte);
+  font-size: 14px;
+  color: var(--texte);
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 9px 10px;
+  width: 100%;
+}
+.champ textarea { resize: vertical; min-height: 80px; }
+.champ select:focus,
+.champ textarea:focus,
+.champ input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+.liste-maintenance { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.element-maintenance { padding-bottom: 12px; border-bottom: 1px solid var(--trait); }
+.element-maintenance:last-child { padding-bottom: 0; border-bottom: 0; }
+.element-maintenance-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.element-maintenance p { margin: 0; font-size: 14px; }
+.element-maintenance .note { font-size: 12px; margin-top: 4px; }
+
+.liste-observations { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.element-observation { padding-bottom: 12px; border-bottom: 1px solid var(--trait); }
+.element-observation:last-child { padding-bottom: 0; border-bottom: 0; }
+.element-observation-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-family: var(--police-mono); font-size: 13px; color: var(--texte-discret); }
+.element-observation p { margin: 0; font-size: 14px; }
+
+.pastille[data-statut-observation="reussi"] { background: var(--ok-fond); color: var(--ok); }
+.pastille[data-statut-observation="echec"] { background: var(--critique-fond); color: var(--critique); }
+.pastille[data-statut-observation="en_attente"] { background: var(--attention-fond); color: var(--attention); }
+
+
+/* ============================================================
+   ASSISTANT (assistant.html) — styles propres à cette page.
+   ============================================================ */
+
+.assistant-panneau { display: flex; flex-direction: column; min-height: 520px; height: calc(100vh - 220px); }
+
+.assistant-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
+
+.assistant-message { max-width: 70%; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+.assistant-message-bot { align-self: flex-start; background: var(--survol); border: 1px solid var(--trait); }
+.assistant-message-utilisateur { align-self: flex-end; background: var(--accent); color: #0A1119; }
+.assistant-message-attente { color: var(--texte-discret); }
+
+.assistant-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-top: 1px solid var(--trait); }
+.bouton-suggestion {
+  font-family: var(--police-texte);
+  font-size: 13px;
+  color: var(--texte-discret);
+  background: none;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.bouton-suggestion:hover { color: var(--texte); background: var(--survol); }
+
+.assistant-saisie { display: flex; gap: 10px; }
+.assistant-saisie input {
+  flex: 1;
+  font-family: var(--police-texte);
+  font-size: 14px;
+  color: var(--texte);
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.assistant-saisie input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
 
 

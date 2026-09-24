@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ciel — Journal de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="entete" id="entete"></header>
+  <nav class="rail" id="rail" aria-label="Sections du tableau de bord"></nav>
+
+  <main class="contenu">
+    <div class="entete-page">
+      <h1>Ciel</h1>
+    </div>
+    <p class="subtitule">Photos de l'extérieur analysées par plate-solving sur le serveur de bord (Épic 2).</p>
+
+    <section class="panneau">
+      <div class="panneau-tete"><h2>Capture manuelle</h2></div>
+      <button class="bouton bouton-principal" type="button" id="capture-manuelle">Prendre une photo</button>
+      <p class="note" id="message-capture"></p>
+    </section>
+
+    <section class="panneau" style="margin-top:16px">
+      <div class="panneau-tete"><h2>Observations</h2></div>
+      <p class="note">Détection des étoiles par vision par ordinateur (OpenCV, en local) — l'identification de la zone du ciel viendra dans une étape suivante.</p>
+      <ul class="liste-observations" id="liste-observations">
+        <li><p class="vide">Aucune observation pour l'instant.</p></li>
+      </ul>
+    </section>
+  </main>
+</div>
+<script src="js/sidebar.js"></script>
+<script>
+  genererBarreLaterale("ciel");
+  genererEntete();
+</script>
+<script src="js/capture.js"></script>
+<script src="js/ciel.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Incidents — Journal de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="entete" id="entete"></header>
+  <nav class="rail" id="rail" aria-label="Sections du tableau de bord"></nav>
+
+  <main class="contenu">
+    <div class="entete-page">
+      <h1>Incidents et maintenance</h1>
+    </div>
+    <p class="subtitule">Les incidents ouverts sont repris automatiquement dans le journal du jour.</p>
+
+    <div class="grille-bord">
+      <section class="panneau large">
+        <div class="panneau-tete">
+          <h2>Registre des incidents</h2>
+          <div class="segments" id="filtre-incidents">
+            <button type="button" data-filtre="non_resolus" aria-pressed="true">Non résolus</button>
+            <button type="button" data-filtre="tous" aria-pressed="false">Tous</button>
+          </div>
+        </div>
+        <div class="tableau-conteneur">
+          <table>
+            <thead>
+              <tr>
+                <th>Réf.</th>
+                <th>Heure</th>
+                <th>Secteur</th>
+                <th>Gravité</th>
+                <th>Description</th>
+                <th>Statut</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="corps-incidents"></tbody>
+          </table>
+          <p class="vide" id="message-incidents-vide" hidden>Aucun incident pour l'instant.</p>
+        </div>
+      </section>
+
+      <div class="colonne-bord">
+        <section class="panneau">
+          <div class="panneau-tete"><h2>Déclarer un incident</h2></div>
+          <form id="formulaire-incident">
+            <div class="champs-cote-a-cote">
+              <label class="champ">
+                <span>Secteur</span>
+                <select id="champ-secteur" name="secteur">
+                  <option value="">— tout le vaisseau —</option>
+                </select>
+              </label>
+              <label class="champ">
+                <span>Gravité</span>
+                <select id="champ-gravite" name="gravite">
+                  <option value="faible">Faible</option>
+                  <option value="moyenne" selected>Moyenne</option>
+                  <option value="critique">Critique</option>
+                </select>
+              </label>
+            </div>
+            <label class="champ">
+              <span>Description</span>
+              <textarea id="champ-description" name="description" rows="4" minlength="10"  placeholder="Ce qui a été constaté, où, et ce qui a déjà été fait." required></textarea>
+            </label>
+            <button class="bouton bouton-principal" type="submit" style="width:100%; margin-top:12px">Déclarer l'incident</button>
+            <p class="note" id="message-incident" hidden></p>
+          </form>
+        </section>
+
+        <section class="panneau">
+          <div class="panneau-tete"><h2>Maintenance</h2></div>
+          <ul class="liste-maintenance" id="liste-maintenance">
+            <li><p class="vide">Aucune maintenance en cours.</p></li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/sidebar.js"></script>
+<script src="js/incidents.js"></script>
+</body>
+</html>

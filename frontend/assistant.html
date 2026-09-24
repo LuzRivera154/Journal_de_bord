@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Assistant — Journal de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="entete" id="entete"></header>
+  <nav class="rail" id="rail" aria-label="Sections du tableau de bord"></nav>
+
+  <main class="contenu">
+    <div class="entete-page">
+      <h1>Assistant</h1>
+    </div>
+    <p class="subtitule">Questions en langage naturel sur l'état du vaisseau et l'historique des journaux.</p>
+
+    <section class="panneau assistant-panneau">
+      <div class="assistant-messages" id="assistant-messages">
+        <div class="assistant-message assistant-message-bot">
+          Assistant de bord en ligne. Les réponses sont calculées sur le serveur de la navette à partir des relevés du jour, sans aucune connexion extérieure.
+        </div>
+      </div>
+
+      <div class="assistant-suggestions" id="assistant-suggestions">
+        <button type="button" class="bouton-suggestion">Quel est le taux d'oxygène ?</button>
+        <button type="button" class="bouton-suggestion">Où sommes-nous ?</button>
+        <button type="button" class="bouton-suggestion">Quels incidents sont en cours ?</button>
+        <button type="button" class="bouton-suggestion">Combien de personnes à bord ?</button>
+        <button type="button" class="bouton-suggestion">Quels sont les besoins à venir ?</button>
+      </div>
+
+      <form class="assistant-saisie" id="assistant-formulaire">
+        <input type="text" id="assistant-question" placeholder="Exemple : quel est le taux d'oxygène dans l'habitat ?" autocomplete="off" required>
+        <button class="bouton bouton-principal" type="submit">Envoyer</button>
+      </form>
+    </section>
+  </main>
+</div>
+<script src="js/sidebar.js"></script>
+<script src="js/assistant.js"></script>
+</body>
+</html>

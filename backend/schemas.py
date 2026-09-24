@@ -70,6 +70,17 @@ class PositionOut(BaseModel):
     methode: str
 
 
+class MaintenanceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    id_secteur: Optional[int]
+    debut: datetime
+    fin_prevue: Optional[datetime]
+    motif: str
+    statut: str
+
+
 class DestinationOut(BaseModel):
     nom: str
     x: float
@@ -101,6 +112,19 @@ class JournalOut(BaseModel):
     modele_utilise: str
     notes_manuelles: Optional[str]
     id_utilisateur: Optional[int]
+
+
+class PopulationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    horodatage: datetime
+    nombre_personnes: int
+    source: str
+
+
+class PopulationIn(BaseModel):
+    nombre_personnes: int
 
 
 class NoteIn(BaseModel):

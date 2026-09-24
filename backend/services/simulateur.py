@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 
 from config import config
 from models import Mesure, Maintenance, Secteur
+from services.alertes import verifier_seuil
 
 SIMULATEURS_CONFIG = config["simulateurs"]
 
@@ -38,6 +39,12 @@ def simuler_oxygene(db):
         db.add(mesure)
         mesures.append(mesure)
     db.commit()
+
+    # Si un taux d'oxygène simulé tombe sous le seuil, ça crée un incident
+    # tout seul (US-4.3, création automatique).
+    for mesure in mesures:
+        verifier_seuil(mesure, db)
+
     return mesures
 
 

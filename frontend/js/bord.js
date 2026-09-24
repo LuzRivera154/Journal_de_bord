@@ -15,6 +15,7 @@ const RAFRAICHISSEMENT_MS = 5000; // se met à jour toutes les 5 secondes
 const TYPES_COURBE = {
   temperature: { libelle: "Température", unite: "°C", decimales: 1 },
   humidite: { libelle: "Humidité", unite: "%", decimales: 0 },
+  oxygene: { libelle: "Oxygène", unite: "%", decimales: 1 },
 };
 
 let typeCourbeActif = "temperature";
@@ -83,12 +84,32 @@ function afficherCourbe(points) {
   });
 }
 
+// L'oxygène a plusieurs valeurs en même temps (une par secteur) : on les
+// regroupe par tanda (même seconde) et on affiche la moyenne de chaque
+// tanda, sinon la courbe fait des zigzags entre les secteurs.
+function moyenneParTanda(points) {
+  const tandas = {}; // clé = horodatage arrondi à la seconde
+
+  points.forEach((p) => {
+    const cle = p.horodatage.slice(0, 19); // "2026-09-24T07:34:30" (sans les millisecondes)
+    if (!tandas[cle]) tandas[cle] = { horodatage: p.horodatage, total: 0, nombre: 0 };
+    tandas[cle].total += p.valeur;
+    tandas[cle].nombre += 1;
+  });
+
+  return Object.values(tandas).map((tanda) => ({
+    horodatage: tanda.horodatage,
+    valeur: tanda.total / tanda.nombre,
+  }));
+}
+
 async function chargerCourbe() {
   try {
     const reponse = await fetch(`/api/stats/mesures?type=${typeCourbeActif}&heures=24`);
     const mesures = await reponse.json();
     // L'API renvoie la plus récente en premier ; la courbe veut l'ordre chronologique.
-    const points = [...mesures].reverse();
+    let points = [...mesures].reverse();
+    if (typeCourbeActif === "oxygene") points = moyenneParTanda(points);
     afficherCourbe(points);
   } catch (erreur) {
     console.error(erreur);
@@ -128,6 +149,12 @@ async function chargerDernieresMesuresDht22() {
     const pastille = document.getElementById("pastille-source-dht22");
     pastille.textContent = derniereTemperature.source;
     pastille.dataset.source = derniereTemperature.source;
+
+    // Les mêmes valeurs alimentent les fiches du haut.
+    document.getElementById("fiche-temperature").textContent = derniereTemperature.valeur + " " + derniereTemperature.unite;
+    document.getElementById("fiche-temperature-sous").textContent = "capteur DHT22, secteur Pont";
+    document.getElementById("fiche-humidite").textContent = derniereHumidite.valeur + " " + derniereHumidite.unite;
+    document.getElementById("fiche-humidite-sous").textContent = "capteur DHT22, secteur Pont";
   } catch (erreur) {
     console.error(erreur);
     // Pas de message d'erreur bloquant ici : la page reste utilisable, elle
@@ -135,8 +162,26 @@ async function chargerDernieresMesuresDht22() {
   }
 }
 
+// Oxygène : une valeur simulée par secteur, donc on affiche la moyenne de
+// la dernière heure plutôt qu'une seule ligne (US-4.2).
+async function chargerFicheOxygene() {
+  try {
+    const reponse = await fetch("/api/stats/mesures?type=oxygene&heures=1");
+    const mesures = await reponse.json();
+
+    if (mesures.length === 0) return; // laisse "n/d" affiché
+
+    const somme = mesures.reduce((total, m) => total + m.valeur, 0);
+    const moyenne = somme / mesures.length;
+    document.getElementById("fiche-oxygene").textContent = moyenne.toFixed(1) + " %";
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
 function rafraichirTout() {
   chargerDernieresMesuresDht22();
+  chargerFicheOxygene();
   chargerCourbe();
 }
 

@@ -20,6 +20,24 @@
     </div>
     <p class="subtitule">En dessous : les dernières mesures du capteur DHT22 (STA-01), pour vérifier que ça marche.</p>
 
+    <div class="grille-fiches">
+      <div class="fiche">
+        <span class="fiche-libelle">Oxygène</span>
+        <div class="fiche-valeur" id="fiche-oxygene">n/d</div>
+        <p class="fiche-sous">moyenne sur les secteurs</p>
+      </div>
+      <div class="fiche">
+        <span class="fiche-libelle">Température</span>
+        <div class="fiche-valeur" id="fiche-temperature">n/d</div>
+        <p class="fiche-sous" id="fiche-temperature-sous"></p>
+      </div>
+      <div class="fiche">
+        <span class="fiche-libelle">Humidité</span>
+        <div class="fiche-valeur" id="fiche-humidite">n/d</div>
+        <p class="fiche-sous" id="fiche-humidite-sous"></p>
+      </div>
+    </div>
+
     <div class="grille-bord">
       <section class="panneau large">
         <div class="panneau-tete">
@@ -27,6 +45,7 @@
           <div class="segments" id="choix-courbe">
             <button type="button" data-type="temperature" aria-pressed="true">Température</button>
             <button type="button" data-type="humidite" aria-pressed="false">Humidité</button>
+            <button type="button" data-type="oxygene" aria-pressed="false">Oxygène</button>
           </div>
         </div>
         <div class="courbe"><canvas id="courbe-bord"></canvas></div>

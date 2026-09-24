@@ -193,12 +193,55 @@ async function chargerFichePopulation() {
   }
 }
 
+// Les secteurs changent presque jamais : on les récupère une seule fois,
+// pour afficher leur nom à côté de chaque alerte (au lieu du numéro d'id).
+let secteursParId = {};
+
+async function chargerSecteurs() {
+  try {
+    const reponse = await fetch("/api/secteurs");
+    const secteurs = await reponse.json();
+    secteurs.forEach((s) => { secteursParId[s.id] = s.nom; });
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
+// Alertes en cours = incidents pas encore résolus (US-4.5, critère 2).
+async function chargerAlertes() {
+  try {
+    const reponse = await fetch("/api/incidents/?statut=ouvert");
+    const alertes = await reponse.json();
+
+    document.getElementById("compteur-alertes").textContent = alertes.length + " active" + (alertes.length > 1 ? "s" : "");
+
+    const liste = document.getElementById("liste-alertes");
+    if (alertes.length === 0) {
+      liste.innerHTML = '<p class="vide">Aucune alerte en cours.</p>';
+      return;
+    }
+
+    liste.innerHTML = alertes.map((alerte) => {
+      const nomSecteur = alerte.id_secteur ? (secteursParId[alerte.id_secteur] || "secteur inconnu") : "tout le vaisseau";
+      return "<li class=\"alerte\" data-gravite=\"" + alerte.gravite + "\">"
+        + "<span class=\"alerte-point\"></span>"
+        + "<span class=\"alerte-titre\">" + alerte.description + "</span>"
+        + "<span class=\"alerte-texte\">" + nomSecteur + " — " + formatDate(alerte.horodatage) + "</span>"
+        + "</li>";
+    }).join("");
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
 function rafraichirTout() {
   chargerDernieresMesuresDht22();
   chargerFicheOxygene();
   chargerFichePopulation();
+  chargerAlertes();
   chargerCourbe();
 }
 
+chargerSecteurs();
 rafraichirTout();
 setInterval(rafraichirTout, RAFRAICHISSEMENT_MS);

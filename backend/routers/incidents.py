@@ -33,11 +33,17 @@ def declarer_incident(donnee: schemas.IncidentIn, db: Session = Depends(get_db))
 
 
 @router.get("/", response_model=list[schemas.IncidentOut])
-def lister_incidents(secteur: str | None = None, date: str | None = None, db: Session = Depends(get_db)):
+def lister_incidents(
+    secteur: str | None = None,
+    date: str | None = None,
+    statut: str | None = None,
+    db: Session = Depends(get_db),
+):
     """Historique des incidents, le plus récent en premier.
 
-    Filtrable par secteur (ex: ?secteur=Pont) et par jour exact
-    (ex: ?date=2026-09-24) — US-4.3, critère 3."""
+    Filtrable par secteur (ex: ?secteur=Pont), par jour exact
+    (ex: ?date=2026-09-24) — US-4.3, critère 3 — et par statut
+    (ex: ?statut=ouvert, pour les alertes en cours — US-4.5, critère 2)."""
     requete = db.query(models.Incident)
 
     if secteur:
@@ -49,5 +55,8 @@ def lister_incidents(secteur: str | None = None, date: str | None = None, db: Se
         debut_jour = datetime.strptime(date, "%Y-%m-%d")
         fin_jour = debut_jour + timedelta(days=1)
         requete = requete.filter(models.Incident.horodatage >= debut_jour, models.Incident.horodatage < fin_jour)
+
+    if statut:
+        requete = requete.filter(models.Incident.statut == statut)
 
     return requete.order_by(models.Incident.horodatage.desc()).all()

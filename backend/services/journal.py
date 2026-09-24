@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import httpx
 
 from config import config, get_ollama_base_url
-from models import Journal, Position, Mesure, Incident, Maintenance, Observation
+from models import Journal, Position, Mesure, Incident, Maintenance, Observation, Crise
 
 OLLAMA_CONFIG = config["ollama"]
 
@@ -23,6 +23,11 @@ CONSIGNE = (
     "- '## ' devant le titre de chaque partie (ex: '## Position')\n"
     "- '- ' devant chaque élément de liste\n"
     "- une ligne par paragraphe, pas de texte sur plusieurs lignes collées\n\n"
+    "Si 'crise_en_cours' n'est pas vide : précise clairement, dans la partie "
+    "Incidents, que la caméra d'observation est indisponible à cause de la "
+    "crise en cours (source absente, pas juste une observation manquante).\n"
+    "Si 'crises_a_resumer' contient des éléments : dans la partie Incidents, "
+    "résume brièvement chaque épisode terminé (début, fin).\n\n"
     "Données du jour :\n"
 )
 
@@ -78,12 +83,26 @@ def rassembler_donnees_du_jour(db):
     maintenance_en_cours = db.query(Maintenance).filter(Maintenance.statut != "terminee").all()
     observations_du_jour = db.query(Observation).filter(Observation.horodatage >= depuis).all()
 
+    # Scénario de crise (Épic 7) : la crise en cours doit être mentionnée
+    # explicitement (source caméra absente), et un épisode qui vient de se
+    # terminer doit être résumé une seule fois — dans le prochain journal
+    # généré après sa fin, donc on compare avec la date du dernier journal.
+    crise_en_cours = db.query(Crise).filter(Crise.fin.is_(None)).order_by(Crise.debut.desc()).first()
+
+    dernier_journal = db.query(Journal).order_by(Journal.date.desc()).first()
+    requete_crises_terminees = db.query(Crise).filter(Crise.fin.isnot(None))
+    if dernier_journal:
+        requete_crises_terminees = requete_crises_terminees.filter(Crise.fin > dernier_journal.date)
+    crises_a_resumer = requete_crises_terminees.order_by(Crise.debut).all()
+
     return {
         "position": _vers_dict(derniere_position),
         "mesures_resumees": _resumer_mesures(mesures_du_jour),
         "incidents_ouverts": [_vers_dict(i) for i in incidents_ouverts],
         "maintenance_en_cours": [_vers_dict(m) for m in maintenance_en_cours],
         "observations": [_vers_dict(o) for o in observations_du_jour],
+        "crise_en_cours": _vers_dict(crise_en_cours),
+        "crises_a_resumer": [_vers_dict(c) for c in crises_a_resumer],
     }
 
 
@@ -137,6 +156,14 @@ def _texte_repli(donnees_json):
     incidents = donnees.get("incidents_ouverts", [])
     maintenances = donnees.get("maintenance_en_cours", [])
     mesures = donnees.get("mesures_resumees", {})
+    crise_en_cours = donnees.get("crise_en_cours")
+    crises_a_resumer = donnees.get("crises_a_resumer", [])
+
+    ligne_incidents = "- " + str(len(incidents)) + " incident(s) en cours."
+    if crise_en_cours:
+        ligne_incidents += " Crise en cours depuis " + str(crise_en_cours["debut"]) + " : caméra d'observation indisponible."
+    for crise in crises_a_resumer:
+        ligne_incidents += "\n- Crise résolue : du " + str(crise["debut"]) + " au " + str(crise["fin"]) + " (dépressurisation, caméra indisponible)."
 
     lignes = [
         "[Journal généré automatiquement — modèle de langage indisponible]",
@@ -148,7 +175,7 @@ def _texte_repli(donnees_json):
         str(mesures) if mesures else "Aucun relevé disponible sur les dernières 24h.",
         "",
         "## Incidents",
-        str(len(incidents)) + " incident(s) en cours.",
+        ligne_incidents,
         "",
         "## Maintenance",
         str(len(maintenances)) + " maintenance(s) en cours." if maintenances else "Aucune maintenance en cours.",

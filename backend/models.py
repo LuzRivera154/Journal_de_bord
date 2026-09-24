@@ -95,6 +95,19 @@ class Utilisateur(Base):
     date_creation = Column(DateTime, default=datetime.utcnow)
 
 
+class Crise(Base):
+    """Scénario de crise pour la démo (Épic 7) : dépressurisation + perte de
+    caméra, déclenché à la main. Pas dans les 9 tables du cahier des
+    charges (section 8) — c'est un nouveau besoin, un Incident seul ne
+    suffit pas car il n'a pas de date de fin à comparer avec les journaux."""
+    __tablename__ = "crises"
+
+    id = Column(Integer, primary_key=True)
+    debut = Column(DateTime, default=datetime.utcnow)
+    fin = Column(DateTime, nullable=True)
+    id_incident = Column(Integer, ForeignKey("incidents.id"), nullable=True)
+
+
 class Journal(Base):
     __tablename__ = "journaux"
 

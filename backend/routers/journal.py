@@ -1,4 +1,6 @@
 """Endpoints du module Journal de bord (section 4.4 du cahier des charges)."""
+from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -21,9 +23,31 @@ def generer(db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=list[schemas.JournalOut])
-def lister_journaux(db: Session = Depends(get_db)):
-    """Archive des journaux, le plus récent en premier."""
-    return db.query(models.Journal).order_by(models.Journal.date.desc()).all()
+def lister_journaux(
+    date: str | None = None,
+    du: str | None = None,
+    au: str | None = None,
+    db: Session = Depends(get_db),
+):
+    """Archive des journaux, le plus récent en premier.
+
+    Filtrable par date exacte (ex: ?date=2026-09-24) ou par plage de dates
+    (ex: ?du=2026-09-20&au=2026-09-24) — US-5.4, critères 1 et 2."""
+    requete = db.query(models.Journal)
+
+    if date:
+        debut_jour = datetime.strptime(date, "%Y-%m-%d")
+        fin_jour = debut_jour + timedelta(days=1)
+        requete = requete.filter(models.Journal.date >= debut_jour, models.Journal.date < fin_jour)
+
+    if du:
+        requete = requete.filter(models.Journal.date >= datetime.strptime(du, "%Y-%m-%d"))
+
+    if au:
+        fin_plage = datetime.strptime(au, "%Y-%m-%d") + timedelta(days=1)
+        requete = requete.filter(models.Journal.date < fin_plage)
+
+    return requete.order_by(models.Journal.date.desc()).all()
 
 
 @router.get("/{journal_id}", response_model=schemas.JournalOut)

@@ -24,6 +24,28 @@
       <section class="panneau">
         <button class="bouton bouton-principal" type="button" id="bouton-generer" style="width:100%; margin-bottom:12px">Rédiger le journal du jour</button>
         <p class="note" id="message-generation" hidden></p>
+
+        <form class="recherche-journal" id="recherche-journal">
+          <label class="champ">
+            <span>Date exacte</span>
+            <input type="date" id="recherche-date" name="date">
+          </label>
+          <div class="champs-cote-a-cote">
+            <label class="champ">
+              <span>Du</span>
+              <input type="date" id="recherche-du" name="du">
+            </label>
+            <label class="champ">
+              <span>Au</span>
+              <input type="date" id="recherche-au" name="au">
+            </label>
+          </div>
+          <div class="recherche-journal-boutons">
+            <button class="bouton bouton-petit" type="submit">Rechercher</button>
+            <button class="bouton bouton-petit" type="button" id="bouton-reinitialiser">Réinitialiser</button>
+          </div>
+        </form>
+
         <ul class="liste-journaux" id="liste-journaux">
           <li><p class="vide">Aucun journal pour l'instant.</p></li>
         </ul>

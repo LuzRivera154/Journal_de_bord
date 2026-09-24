@@ -64,14 +64,16 @@ async function chargerJournal(id) {
   }
 }
 
-async function chargerListeJournaux(idASelectionner) {
+async function chargerListeJournaux(idASelectionner, parametresRecherche) {
   try {
-    const reponse = await fetch("/api/journal/");
+    const requete = new URLSearchParams(parametresRecherche || {});
+    const reponse = await fetch("/api/journal/?" + requete.toString());
     const journaux = await reponse.json();
     const liste = document.getElementById("liste-journaux");
 
     if (journaux.length === 0) {
-      liste.innerHTML = '<li><p class="vide">Aucun journal pour l\'instant.</p></li>';
+      liste.innerHTML = '<li><p class="vide">Aucun journal pour cette recherche.</p></li>';
+      document.getElementById("journal-article").innerHTML = '<p class="vide">Aucun journal ne correspond à cette recherche.</p>';
       return;
     }
 
@@ -117,6 +119,31 @@ document.getElementById("bouton-generer").addEventListener("click", async () => 
     bouton.disabled = false;
     bouton.textContent = "Rédiger le journal du jour";
   }
+});
+
+// Recherche par date exacte OU par plage (du/au) — si la date exacte est
+// remplie, elle prime et la plage est ignorée (US-5.4).
+document.getElementById("recherche-journal").addEventListener("submit", (evenement) => {
+  evenement.preventDefault();
+
+  const date = document.getElementById("recherche-date").value;
+  const du = document.getElementById("recherche-du").value;
+  const au = document.getElementById("recherche-au").value;
+
+  const parametres = {};
+  if (date) {
+    parametres.date = date;
+  } else {
+    if (du) parametres.du = du;
+    if (au) parametres.au = au;
+  }
+
+  chargerListeJournaux(undefined, parametres);
+});
+
+document.getElementById("bouton-reinitialiser").addEventListener("click", () => {
+  document.getElementById("recherche-journal").reset();
+  chargerListeJournaux();
 });
 
 chargerListeJournaux();

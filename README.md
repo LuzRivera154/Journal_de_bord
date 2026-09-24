@@ -4,20 +4,30 @@ Backend du projet "Journal de bord" (workshop Horizon 2080 / ESA — voir
 `Cahier des charges Journal de bord de la navette.docx.pdf` pour le détail
 complet des besoins).
 
-## État actuel
+## 🚀 État actuel
 
-Ceci est un **squelette**, pas le projet terminé. Ce qui fonctionne déjà :
+Ce qui fonctionne déjà :
 
-- Connexion à PostgreSQL
-- Les 9 tables de la base de données (section 8 du cahier des charges)
-- Un endpoint de test pour vérifier que tout est bien connecté
+- Connexion à PostgreSQL, les 9 tables (section 8 du cahier des charges)
+- Navigation : position du jour, trajet, distance/date d'arrivée
+- Statistiques : DHT22 (réel + simulé), simulateurs (oxygène, stocks,
+  maintenance), courbes du Bord
+- Incidents et maintenance : déclaration, changement de statut, alertes
+  automatiques sur seuils dépassés
+- Population à bord
+- Journal de bord : génération automatique (à heure fixe) et à la demande,
+  via Ollama (avec repli sur un texte fixe si Ollama ne répond pas),
+  recherche par date exacte ou par plage de dates
+- Frontend complet (pages Bord, Navigation, Ciel, Journal, Incidents) dans
+  `frontend/`, servi directement par le backend (voir "Démarrer le
+  serveur" ci-dessous)
 
-Ce qu'il **reste à faire** (à répartir dans l'équipe, voir section 12 du
-cahier des charges) : les modules Observation stellaire, Navigation,
-Statistiques, Journal et Assistant. Chacun sera un nouveau fichier dans
-`backend/routers/` (et sa logique dans `backend/services/`).
+Ce qu'il **reste à faire** : Observation stellaire (capture + analyse
+astrometry.net), Assistant (le frontend existe déjà dans
+`frontend/assistant.html`, il manque le endpoint `POST /api/assistant/...`
+côté backend).
 
-## Prérequis
+## 📋 Prérequis
 
 Le projet tourne pareil sous Windows et sous Linux : la base de données et
 Ollama sont dans des conteneurs Docker (identiques quel que soit l'OS), et
@@ -40,7 +50,7 @@ docker --version
 docker compose version
 ```
 
-## Installation
+## ⚙️ Installation
 
 ```bash
 # 1. Cloner le dépôt (si ce n'est pas déjà fait)
@@ -64,7 +74,7 @@ source venv/bin/activate      # sous Windows : venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Démarrer le serveur
+## ▶️ Démarrer le serveur
 
 ```bash
 # Depuis backend/, avec l'environnement virtuel activé
@@ -74,11 +84,41 @@ uvicorn main:app --reload
 Si tout s'est bien passé, le dernier message ressemble à
 `Uvicorn running on http://127.0.0.1:8000`.
 
-## Comment tester
+### 🐳 Alternative : tout lancer via Docker (sans venv)
 
-Ouvrir **http://localhost:8000/docs** dans le navigateur. C'est l'interface
-générée automatiquement par FastAPI : chaque endpoint peut être testé en un
-clic, sans avoir besoin de Postman.
+Au lieu des étapes ci-dessus, on peut aussi construire et lancer le backend
+comme un conteneur (pratique pour tester "à froid", ou si le venv pose
+problème) :
+
+```bash
+docker compose up -d --build backend
+```
+
+**Important** : `backend/` est copié dans l'image au moment du build (pas
+un volume monté en direct) — donc après **chaque** changement de code
+Python, il faut relancer cette commande pour que le conteneur prenne le
+changement en compte. `frontend/`, lui, est monté en direct : pas besoin de
+rebuild pour un changement HTML/CSS/JS.
+
+### 🤖 Ollama (génération du journal par IA)
+
+Le premier démarrage d'Ollama n'a pas encore de modèle téléchargé — sans
+cette étape, la génération de journal utilise toujours le texte de repli
+(NFR "Résilience", donc ça ne plante pas, mais il vaut mieux tester avec la
+vraie IA) :
+
+```bash
+docker exec journal-ollama ollama pull qwen2.5:3b
+```
+
+## 🧪 Comment tester
+
+Ouvrir **http://localhost:8000/** dans le navigateur pour voir le
+frontend (page Bord, avec le menu à gauche vers les autres pages).
+
+Pour tester l'API directement, ouvrir **http://localhost:8000/docs** —
+c'est l'interface générée automatiquement par FastAPI : chaque endpoint
+peut être testé en un clic, sans avoir besoin de Postman.
 
 Tester dans l'ordre :
 
@@ -91,7 +131,7 @@ Tester dans l'ordre :
 Si l'étape 2 échoue mais que l'étape 1 a marché, le problème vient de la
 connexion à la base — voir Dépannage ci-dessous.
 
-## Voir les tables de la base de données
+## 🗄️ Voir les tables de la base de données
 
 Il y a **Adminer** (équivalent de phpMyAdmin, mais pour PostgreSQL) inclus
 dans le `docker-compose.yml`. Pratique pour voir les tables et les données
@@ -111,7 +151,7 @@ Puis ouvrir **http://localhost:8080** et se connecter avec :
 | Mot de passe | valeur de `POSTGRES_PASSWORD` dans votre `.env` |
 | Base de données | valeur de `POSTGRES_DB` dans votre `.env` |
 
-## Tout arrêter
+## 🛑 Tout arrêter
 
 ```bash
 docker compose down
@@ -120,13 +160,16 @@ docker compose down
 (Les données de Postgres restent dans un volume Docker, elles ne sont pas
 perdues avec `down`. Pour tout effacer : `docker compose down -v`.)
 
-## Structure du projet
+## 📁 Structure du projet
 
 ```
 Journal_de_bord/
 ├── config.yaml              # toute la configuration ajustable (rien en dur)
-├── docker-compose.yml       # services : db (Postgres), backend, ollama
+├── docker-compose.yml       # services : db (Postgres), backend, ollama, adminer
 ├── data/                    # images capturées, index astrometry.net (non versionné)
+├── frontend/                # pages HTML/CSS/JS, servies par le backend (pas de build)
+│   ├── css/style.css
+│   └── js/                  # un fichier par page + sidebar.js (menu commun)
 └── backend/
     ├── main.py              # démarrage de l'app + endpoints de test
     ├── config.py            # lecture de config.yaml
@@ -137,7 +180,7 @@ Journal_de_bord/
     └── services/             # ICI va la logique de chaque module
 ```
 
-## Dépannage
+## 🔧 Dépannage
 
 | Problème | Cause probable |
 |---|---|
@@ -148,3 +191,5 @@ Journal_de_bord/
 | `RuntimeError: DATABASE_URL manquant` au lancement de `uvicorn` | Le fichier `.env` n'existe pas encore : `cp .env.example .env` à la racine du projet |
 | `uvicorn : le terme n'est pas reconnu` alors que `(venv)` est affiché | Le venv a été créé au mauvais endroit (à la racine au lieu de `backend/`). Supprimer ce venv vide, puis refaire `cd backend` avant `python -m venv venv` |
 | Une commande marche puis, après un `pip install` ou une install (Python, Docker...), la même commande "n'est pas reconnue" | Le PATH est resté en mémoire depuis avant l'installation. Fermer complètement le terminal (voire VS Code) et en rouvrir un nouveau |
+| Le journal généré dit "modèle de langage indisponible" (texte de repli) alors qu'Ollama tourne | Le modèle n'a pas encore été téléchargé : `docker exec journal-ollama ollama pull qwen2.5:3b` (une seule fois, ~2 Go, peut prendre plusieurs minutes) |
+| Un changement dans `backend/` (routers, services, models...) ne se voit pas dans le navigateur | Si le backend tourne dans Docker, il faut le reconstruire après chaque changement Python : `docker compose up -d --build backend`. Un changement dans `frontend/` n'a pas besoin de ça (juste rafraîchir la page) |

@@ -46,6 +46,12 @@ class IncidentIn(BaseModel):
     statut: str = "ouvert"
 
 
+class IncidentStatutIn(BaseModel):
+    """Pour changer juste le statut d'un incident (boutons "Prendre en
+    charge" / "Marquer résolu" de la page Incidents)."""
+    statut: str
+
+
 class IncidentOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -57,22 +57,44 @@
         <p class="note">Capteur DHT22, secteur <span id="courbe-secteur"></span> — relevé toutes les <span id="courbe-intervalle"></span> minutes.</p>
       </section>
 
-      <section class="panneau">
-        <div class="panneau-tete"><h2>Dernier relevé</h2><span class="pastille" id="pastille-source-dht22"></span></div>
-        <dl class="donnees">
-          <div><dt>Température</dt><dd id="dht22-temperature">n/d</dd></div>
-          <div><dt>Humidité</dt><dd id="dht22-humidite">n/d</dd></div>
-          <div><dt>Heure</dt><dd id="dht22-date">n/d</dd></div>
-        </dl>
-      </section>
+      <div class="colonne-bord">
+        <section class="panneau">
+          <div class="panneau-tete"><h2>Alertes</h2><span class="compteur" id="compteur-alertes"></span></div>
+          <ul class="liste-alertes" id="liste-alertes"></ul>
+        </section>
+
+        <section class="panneau">
+          <div class="panneau-tete"><h2>Dernier relevé</h2><span class="pastille" id="pastille-source-dht22"></span></div>
+          <dl class="donnees">
+            <div><dt>Température</dt><dd id="dht22-temperature">n/d</dd></div>
+            <div><dt>Humidité</dt><dd id="dht22-humidite">n/d</dd></div>
+            <div><dt>Heure</dt><dd id="dht22-date">n/d</dd></div>
+          </dl>
+        </section>
+      </div>
     </div>
 
-    <section class="panneau large" style="margin-top:16px">
-      <div class="panneau-tete"><h2>Dernier journal</h2><span class="note" id="journal-meta"></span></div>
-      <div class="journal-extrait" id="journal-extrait">
-        <p class="vide">Aucun journal généré pour l'instant.</p>
-      </div>
-    </section>
+    <div class="grille-bas">
+      <section class="panneau">
+        <div class="panneau-tete"><h2>Trajet</h2><a class="bouton bouton-petit" href="navigation.html">Carte</a></div>
+        <div class="trajet-pourcent" id="trajet-pourcentage">n/d</div>
+        <div class="jauge"><span id="trajet-barre" style="width:0%"></span></div>
+        <div class="trajet-bornes"><span>Départ</span><span id="trajet-destination-nom"></span></div>
+        <dl class="donnees" style="margin-top:12px">
+          <div><dt>Parcouru</dt><dd id="trajet-parcouru">n/d</dd></div>
+          <div><dt>Restant</dt><dd id="trajet-restant">n/d</dd></div>
+          <div><dt>Arrivée estimée</dt><dd id="trajet-arrivee">n/d</dd></div>
+        </dl>
+      </section>
+
+      <section class="panneau">
+        <div class="panneau-tete"><h2>Dernier journal</h2><a class="bouton bouton-petit" href="journal.html">Lire le journal</a></div>
+        <p class="note" id="journal-meta"></p>
+        <div class="journal-extrait" id="journal-extrait">
+          <p class="vide">Aucun journal généré pour l'instant.</p>
+        </div>
+      </section>
+    </div>
   </main>
 </div>
 <script src="js/sidebar.js"></script>

@@ -263,6 +263,10 @@ function formaterTexteJournal(texte) {
   return html;
 }
 
+// Juste un extrait sur le Bord (2 premières lignes de contenu, titres "## "
+// exclus mais listes "- " gardées comme texte simple — le modèle écrit
+// parfois tout en listes, sans aucun paragraphe) — le texte complet se lit
+// sur journal.html (bouton "Lire le journal").
 async function chargerDernierJournal() {
   try {
     const reponse = await fetch("/api/journal/");
@@ -271,8 +275,54 @@ async function chargerDernierJournal() {
     if (journaux.length === 0) return; // laisse le message "Aucun journal..."
 
     const dernier = journaux[0]; // le plus récent est en premier
-    document.getElementById("journal-extrait").innerHTML = formaterTexteJournal(dernier.texte_genere);
-    document.getElementById("journal-meta").textContent = formatDate(dernier.date) + " — " + dernier.modele_utilise;
+
+    const toutesLesLignes = dernier.texte_genere
+      .split("\n")
+      .map((ligne) => ligne.trim())
+      .filter((ligne) => ligne && !ligne.startsWith("## "))
+      .map((ligne) => (ligne.startsWith("- ") ? ligne.slice(2) : ligne));
+    const lignes = toutesLesLignes.slice(0, 2);
+
+    let html = lignes.map((l) => "<p>" + l + "</p>").join("");
+    if (toutesLesLignes.length > lignes.length) {
+      html += '<p class="extrait-suite">…</p>'; // signale qu'il y a plus à lire dans journal.html
+    }
+    document.getElementById("journal-extrait").innerHTML = html;
+    document.getElementById("journal-meta").textContent = "Rédigé le " + formatDate(dernier.date) + " par " + dernier.modele_utilise;
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
+// Résumé du trajet (US-3.3/3.4 déjà construites côté Navigation, ici on
+// recalcule juste le % parcouru pour l'affichage).
+async function chargerTrajet() {
+  try {
+    const [reponsePositions, reponseDestination] = await Promise.all([
+      fetch("/api/navigation/positions"),
+      fetch("/api/navigation/destination"),
+    ]);
+    const positions = await reponsePositions.json();
+    const destination = await reponseDestination.json();
+
+    if (positions.length === 0) return;
+
+    const depart = positions[positions.length - 1]; // la liste va du plus récent au plus ancien
+    const dx = destination.x - depart.x;
+    const dy = destination.y - depart.y;
+    const dz = destination.z - depart.z;
+    const distanceTotale = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const distanceParcourue = Math.max(0, distanceTotale - destination.distance_restante);
+    const pourcentage = distanceTotale > 0 ? (distanceParcourue / distanceTotale) * 100 : 0;
+
+    document.getElementById("trajet-pourcentage").textContent = pourcentage.toFixed(1);
+    document.getElementById("trajet-barre").style.width = Math.min(100, Math.max(0, pourcentage)) + "%";
+    document.getElementById("trajet-destination-nom").textContent = destination.nom;
+    document.getElementById("trajet-parcouru").textContent = distanceParcourue.toFixed(2);
+    document.getElementById("trajet-restant").textContent = destination.distance_restante.toFixed(2);
+    document.getElementById("trajet-arrivee").textContent = destination.date_arrivee_estimee
+      ? new Date(destination.date_arrivee_estimee).toLocaleDateString("fr-FR")
+      : "n/d";
   } catch (erreur) {
     console.error(erreur);
   }
@@ -285,6 +335,7 @@ function rafraichirTout() {
   chargerAlertes();
   chargerCourbe();
   chargerDernierJournal();
+  chargerTrajet();
 }
 
 chargerSecteurs();

@@ -2,6 +2,8 @@
 de l'équipage (cf. NFR "Fonctionnement hors ligne" : tout tourne en local,
 rien ne dépend d'une requête extérieure pour se lancer).
 """
+import json
+
 import cv2
 from datetime import datetime
 from pathlib import Path
@@ -10,17 +12,44 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from config import config
 from database import SessionLocal
+from models import Observation
 from services.navigation import calculer_position_du_jour
 from services.dht22 import enregistrer_lecture_dht22
-from services.simulateur import simuler_oxygene, simuler_stocks, simuler_maintenance
+from services.simulateur import (
+    simuler_oxygene,
+    simuler_stocks,
+    simuler_maintenance,
+    simuler_secteurs,
+    simuler_occupation,
+    simuler_reserves,
+)
 from services.population import simuler_population
 from services.journal import generer_journal
 from services.crise import crise_active
+from services.observation import detecter_etoiles
 
 
 SCHEDULER_CONFIG = config["scheduler"]
 
 scheduler = BackgroundScheduler()
+
+
+def _enregistrer_observation(chemin):
+    """Après une capture réussie : enregistre l'observation et détecte les
+    étoiles dessus tout de suite (Épic 2 — la détection est locale et
+    rapide, pas besoin d'une étape séparée)."""
+    db = SessionLocal()
+    try:
+        etoiles = detecter_etoiles(chemin)
+        observation = Observation(
+            chemin_image=chemin,
+            etoiles_detectees=json.dumps(etoiles),
+            statut_analyse="reussi",
+        )
+        db.add(observation)
+        db.commit()
+    finally:
+        db.close()
 
 
 def tache_calcul_position():
@@ -64,6 +93,7 @@ def tache_capture_automatique():
 
     cv2.imwrite(str(chemin), image)
     print(f"Capture enregistrée : {chemin}")
+    _enregistrer_observation(str(chemin))
 
 
 def tache_lecture_dht22():
@@ -85,13 +115,17 @@ def tache_generation_journal():
 
 
 def tache_simulation():
-    """Génère les données simulées : oxygène, stocks, maintenance (STA-02)."""
+    """Génère les données simulées : oxygène, stocks, maintenance, secteurs,
+    réserves (STA-02)."""
     db = SessionLocal()
     try:
         simuler_oxygene(db)
         simuler_stocks(db)
         simuler_maintenance(db)
         simuler_population(db)
+        simuler_occupation(db)  # après simuler_population, pour répartir le total à jour
+        simuler_secteurs(db)
+        simuler_reserves(db)
     finally:
         db.close()
 
@@ -120,6 +154,7 @@ def tache_capture_manuelle():
     chemin = dossier / f"capture_{horodatage}.jpg"
 
     cv2.imwrite(str(chemin), image)
+    _enregistrer_observation(str(chemin))
 
     return {"success": True, "chemin": str(chemin)}
 

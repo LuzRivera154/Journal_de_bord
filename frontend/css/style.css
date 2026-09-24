@@ -262,4 +262,12 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .colonne-bord { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 @media (max-width: 920px) { .grille-bord { grid-template-columns: 1fr; } .grille-bord .large { grid-column: auto; } }
 
+/* Texte du journal : les "## " et "- " du modèle sont transformés en HTML
+   par js/bord.js (voir formaterTexteJournal), stylés ici. */
+.journal-extrait h3 { margin: 16px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.journal-extrait h3:first-child { margin-top: 0; }
+.journal-extrait p { margin: 0 0 8px; font-size: 14px; }
+.journal-extrait ul { margin: 0 0 8px; padding-left: 20px; }
+.journal-extrait li { margin-bottom: 4px; font-size: 14px; }
+
 

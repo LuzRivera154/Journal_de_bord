@@ -11,10 +11,10 @@ app:
 # Voir .env.example à la racine du projet.
 
 ollama:
-  base_url: "http://localhost:11434"
+  base_url: "http://localhost:11434"  # en local hors Docker ; dans Docker, voir OLLAMA_BASE_URL dans docker-compose.yml
   model: "qwen2.5:3b"
   enabled: true
-  timeout_seconds: 90
+  timeout_seconds: 105 # JRN : laisse de la marge sous la limite de 2 min (STA... US-5.1, critère 2)
 
 scheduler:
   enabled: true

@@ -234,12 +234,57 @@ async function chargerAlertes() {
   }
 }
 
+// Convertit le texte du journal ("## titre", "- élément", paragraphes) en
+// HTML lisible — c'est le format imposé au modèle par la consigne
+// (voir backend/services/journal.py).
+function formaterTexteJournal(texte) {
+  const lignes = texte.split("\n");
+  let html = "";
+  let dansListe = false;
+
+  lignes.forEach((ligne) => {
+    const ligneNettoyee = ligne.trim();
+
+    if (ligneNettoyee.startsWith("## ")) {
+      if (dansListe) { html += "</ul>"; dansListe = false; }
+      html += "<h3>" + ligneNettoyee.slice(3) + "</h3>";
+    } else if (ligneNettoyee.startsWith("- ")) {
+      if (!dansListe) { html += "<ul>"; dansListe = true; }
+      html += "<li>" + ligneNettoyee.slice(2) + "</li>";
+    } else if (ligneNettoyee === "") {
+      if (dansListe) { html += "</ul>"; dansListe = false; }
+    } else {
+      if (dansListe) { html += "</ul>"; dansListe = false; }
+      html += "<p>" + ligneNettoyee + "</p>";
+    }
+  });
+
+  if (dansListe) html += "</ul>";
+  return html;
+}
+
+async function chargerDernierJournal() {
+  try {
+    const reponse = await fetch("/api/journal/");
+    const journaux = await reponse.json();
+
+    if (journaux.length === 0) return; // laisse le message "Aucun journal..."
+
+    const dernier = journaux[0]; // le plus récent est en premier
+    document.getElementById("journal-extrait").innerHTML = formaterTexteJournal(dernier.texte_genere);
+    document.getElementById("journal-meta").textContent = formatDate(dernier.date) + " — " + dernier.modele_utilise;
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
 function rafraichirTout() {
   chargerDernieresMesuresDht22();
   chargerFicheOxygene();
   chargerFichePopulation();
   chargerAlertes();
   chargerCourbe();
+  chargerDernierJournal();
 }
 
 chargerSecteurs();

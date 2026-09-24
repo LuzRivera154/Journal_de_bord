@@ -66,13 +66,17 @@
         </dl>
       </section>
     </div>
+
+    <section class="panneau large" style="margin-top:16px">
+      <div class="panneau-tete"><h2>Dernier journal</h2><span class="note" id="journal-meta"></span></div>
+      <div class="journal-extrait" id="journal-extrait">
+        <p class="vide">Aucun journal généré pour l'instant.</p>
+      </div>
+    </section>
   </main>
 </div>
 <script src="js/sidebar.js"></script>
-<script>
-  genererBarreLaterale("bord");
-  genererEntete();
-</script>
-<script src="js/capture.js"></script>
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/bord.js"></script>
 </body>
 </html>

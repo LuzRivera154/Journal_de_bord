@@ -18,19 +18,78 @@ const TYPES_COURBE = {
 };
 
 let typeCourbeActif = "temperature";
+let graphique = null; // instance Chart.js : créée une fois, puis mise à jour (pas recréée)
 
 function formatDate(iso) {
   return new Date(iso).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "medium" });
 }
 
+// Dessine ou met à jour la courbe avec Chart.js (chargé depuis js/vendor/,
+// pas de CDN — doit marcher hors ligne).
+function afficherCourbe(points) {
+  const config = TYPES_COURBE[typeCourbeActif];
+  const etiquettes = points.map((p) => new Date(p.horodatage).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
+  const valeurs = points.map((p) => p.valeur);
+
+  if (graphique) {
+    // Déjà créée : on remplace juste les données, plus fluide qu'une recréation.
+    graphique.data.labels = etiquettes;
+    graphique.data.datasets[0].label = config.libelle;
+    graphique.data.datasets[0].data = valeurs;
+    graphique.update();
+    return;
+  }
+
+  const canvas = document.getElementById("courbe-bord");
+  const ctx = canvas.getContext("2d");
+  const degrade = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  degrade.addColorStop(0, "rgba(143, 179, 255, 0.28)");
+  degrade.addColorStop(1, "rgba(143, 179, 255, 0)");
+
+  graphique = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: etiquettes,
+      datasets: [{
+        label: config.libelle,
+        data: valeurs,
+        borderColor: "#8FB3FF",
+        backgroundColor: degrade,
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        borderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { color: "#22324A" }, ticks: { color: "#8CA0B8", maxTicksLimit: 6 } },
+        y: { grid: { color: "#22324A" }, ticks: { color: "#8CA0B8" } },
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1E2C40",
+          titleColor: "#DCE5EF",
+          bodyColor: "#DCE5EF",
+          borderColor: "#22324A",
+          borderWidth: 1,
+        },
+      },
+    },
+  });
+}
+
 async function chargerCourbe() {
-  const conteneur = document.getElementById("courbe-bord");
   try {
     const reponse = await fetch(`/api/stats/mesures?type=${typeCourbeActif}&heures=24`);
     const mesures = await reponse.json();
     // L'API renvoie la plus récente en premier ; la courbe veut l'ordre chronologique.
     const points = [...mesures].reverse();
-    dessinerCourbe(conteneur, points, TYPES_COURBE[typeCourbeActif]);
+    afficherCourbe(points);
   } catch (erreur) {
     console.error(erreur);
   }

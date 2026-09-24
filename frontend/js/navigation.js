@@ -98,7 +98,18 @@ function dessinerEtiquette(ctx, texte, x, y, largeurCanvas, decalage = 8) {
 function dessinerTrajet(positions, destination) {
   const canvas = document.getElementById("carte");
   const ctx = canvas.getContext("2d");
-  const largeur = canvas.width, hauteur = canvas.height;
+
+  // Le canvas a une résolution interne fixe (480x320) mais s'affiche étiré
+  // à la taille de son conteneur en CSS — sur un écran plus large, le texte
+  // et les traits ressortaient flous/pixelisés. On ajuste la résolution
+  // interne à la taille réellement affichée (× devicePixelRatio pour les
+  // écrans haute densité), puis on dessine en coordonnées "CSS" via scale().
+  const ratio = window.devicePixelRatio || 1;
+  const largeur = canvas.clientWidth;
+  const hauteur = canvas.clientHeight;
+  canvas.width = largeur * ratio;
+  canvas.height = hauteur * ratio;
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   ctx.clearRect(0, 0, largeur, hauteur);
 
   if (positions.length === 0) return;
@@ -240,3 +251,8 @@ elBoutonCalculer.addEventListener("click", async () => {
 });
 
 chargerPositions();
+
+// Le premier dessin peut arriver avant que les polices web (IBM Plex, Saira)
+// aient fini de charger : le canvas utilise alors une police de secours,
+// moins jolie. On redessine une fois que les polices sont prêtes.
+document.fonts.ready.then(chargerPositions);

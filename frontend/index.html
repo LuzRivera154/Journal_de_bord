@@ -18,7 +18,7 @@
     <div class="entete-page">
       <h1>Bord</h1>
     </div>
-    <p class="note"> les dernières mesures du capteur DHT22 (STA-01), pour vérifier que ça marche.</p>
+    <p class="subtitule">En dessous : les dernières mesures du capteur DHT22 (STA-01), pour vérifier que ça marche.</p>
 
     <div class="grille-bord">
       <section class="panneau large">
@@ -29,7 +29,7 @@
             <button type="button" data-type="humidite" aria-pressed="false">Humidité</button>
           </div>
         </div>
-        <div class="courbe" id="courbe-bord"></div>
+        <div class="courbe"><canvas id="courbe-bord"></canvas></div>
         <p class="note">Capteur DHT22, secteur <span id="courbe-secteur"></span> — relevé toutes les <span id="courbe-intervalle"></span> minutes.</p>
       </section>
 
@@ -45,7 +45,7 @@
   </main>
 </div>
 <script src="js/sidebar.js"></script>
-<script src="js/graphiques.js"></script>
+<script src="js/vendor/chart.umd.min.js"></script>
 <script src="js/bord.js"></script>
 </body>
 </html>

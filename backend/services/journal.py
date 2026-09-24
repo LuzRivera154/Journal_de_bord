@@ -1,13 +1,6 @@
 """Génération du journal de bord quotidien (section 4.4 du cahier des charges).
 
-Principe (section 6) : on rassemble les données du jour en JSON, on les
-envoie au modèle de langage local (Ollama) avec une consigne fixe qui impose
-la structure, et le modèle rédige uniquement à partir de ces données — ça
-limite les informations inventées.
 
-Si Ollama ne répond pas (pas démarré, modèle pas téléchargé, trop lent), on
-retombe sur un texte simple à partir d'un gabarit fixe, pour ne jamais
-bloquer la génération (cf. NFR "Résilience").
 """
 import json
 from datetime import datetime, timedelta
@@ -15,7 +8,7 @@ from datetime import datetime, timedelta
 import httpx
 
 from config import config, get_ollama_base_url
-from models import Journal, Position, Mesure, Incident, Observation
+from models import Journal, Position, Mesure, Incident, Maintenance, Observation
 
 OLLAMA_CONFIG = config["ollama"]
 
@@ -82,12 +75,14 @@ def rassembler_donnees_du_jour(db):
     derniere_position = db.query(Position).order_by(Position.date.desc()).first()
     mesures_du_jour = db.query(Mesure).filter(Mesure.horodatage >= depuis).all()
     incidents_ouverts = db.query(Incident).filter(Incident.statut != "resolu").all()
+    maintenance_en_cours = db.query(Maintenance).filter(Maintenance.statut != "terminee").all()
     observations_du_jour = db.query(Observation).filter(Observation.horodatage >= depuis).all()
 
     return {
         "position": _vers_dict(derniere_position),
         "mesures_resumees": _resumer_mesures(mesures_du_jour),
         "incidents_ouverts": [_vers_dict(i) for i in incidents_ouverts],
+        "maintenance_en_cours": [_vers_dict(m) for m in maintenance_en_cours],
         "observations": [_vers_dict(o) for o in observations_du_jour],
     }
 
@@ -140,6 +135,8 @@ def _texte_repli(donnees_json):
     donnees = json.loads(donnees_json)
     position = donnees.get("position")
     incidents = donnees.get("incidents_ouverts", [])
+    maintenances = donnees.get("maintenance_en_cours", [])
+    mesures = donnees.get("mesures_resumees", {})
 
     lignes = [
         "[Journal généré automatiquement — modèle de langage indisponible]",
@@ -148,13 +145,13 @@ def _texte_repli(donnees_json):
         str(position) if position else "Donnée manquante.",
         "",
         "## État général",
-        "Voir les mesures du jour dans les données sources.",
+        str(mesures) if mesures else "Aucun relevé disponible sur les dernières 24h.",
         "",
         "## Incidents",
         str(len(incidents)) + " incident(s) en cours.",
         "",
         "## Maintenance",
-        "Voir la table maintenance.",
+        str(len(maintenances)) + " maintenance(s) en cours." if maintenances else "Aucune maintenance en cours.",
         "",
         "## Besoins et observations",
         "Pas de résumé automatique disponible sans le modèle de langage.",

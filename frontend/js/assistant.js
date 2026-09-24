@@ -32,7 +32,7 @@ async function poserQuestion(question) {
   zoneMessages.scrollTop = zoneMessages.scrollHeight;
 
   try {
-    const reponse = await fetch("/api/assistant/demander", {
+    const reponse = await fetch("/api/assistant/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: question }),

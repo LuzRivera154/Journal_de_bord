@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Journal — Journal de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Semi+Condensed:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="entete" id="entete"></header>
+  <nav class="rail" id="rail" aria-label="Sections du tableau de bord"></nav>
+
+  <main class="contenu">
+    <div class="entete-page">
+      <h1>Journal</h1>
+    </div>
+    <p class="subtitule">Rédigé chaque jour à heure fixe par le modèle de langage du serveur, sans connexion extérieure.</p>
+
+    <div class="grille-journal">
+      <section class="panneau">
+        <button class="bouton bouton-principal" type="button" id="bouton-generer" style="width:100%; margin-bottom:12px">Rédiger le journal du jour</button>
+        <p class="note" id="message-generation" hidden></p>
+        <ul class="liste-journaux" id="liste-journaux">
+          <li><p class="vide">Aucun journal pour l'instant.</p></li>
+        </ul>
+      </section>
+
+      <article class="panneau journal-article" id="journal-article">
+        <p class="vide">Choisissez un journal dans la liste, ou générez celui du jour.</p>
+      </article>
+    </div>
+  </main>
+</div>
+<script src="js/sidebar.js"></script>
+<script src="js/journal.js"></script>
+</body>
+</html>

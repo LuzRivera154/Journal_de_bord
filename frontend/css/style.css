@@ -46,6 +46,17 @@ body {
   grid-template-rows: auto 1fr;
 }
 
+/* Écran assez grand : l'entête et le rail restent immobiles, seul le
+   contenu central défile. Pas de "position: fixed" ici — un élément fixed
+   sort de la grille et casse tout le placement (rail qui remonte, contenu
+   caché dessous...). À la place, .app prend toute la hauteur de l'écran et
+   c'est .contenu qui défile tout seul à l'intérieur. */
+@media (min-width: 701px) {
+  .app { height: 100vh; overflow: hidden; }
+  .rail { min-height: 0; overflow-y: auto; }
+  .contenu { min-height: 0; overflow-y: auto; }
+}
+
 @media (max-width: 700px) {
   .app { grid-template-columns: 1fr; }
   .rail { position: static; flex-direction: row; height: auto; overflow-x: auto; }
@@ -68,10 +79,15 @@ body {
 .marque-nom { font-family: var(--police-titre); font-weight: 700; font-size: 20px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
 .marque-sous { font-size: 16px; color: var(--texte-discret); }
 
-.entete-heure { font-family: var(--police-mono); font-size: 18px; color: var(--texte-discret); display:flex; align-items: center; flex-direction: column; }
-.entete-heure-texte{
+.entete-infos { display: flex; align-items: center; gap: 24px; }
+.entete-heure { font-family: var(--police-mono); color: var(--texte-discret); display:flex; align-items: center; flex-direction: column; }
+.entete-heure-texte {
   margin: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
+.entete-heure span { font-size: 14px; color: var(--texte); }
 /* Barre latérale (générée par js/sidebar.js — commune à toutes les pages) */
 .rail {
   grid-row: 2;
@@ -204,6 +220,7 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .bouton-principal { background: var(--accent); color: #0A1119; border-color: var(--accent); }
 .bouton-principal:hover { filter: brightness(1.08); }
 .bouton:disabled { opacity: 0.6; cursor: default; }
+.bouton-petit { min-height: 32px; padding: 6px 12px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; }
 
 
 /* ============================================================
@@ -247,6 +264,33 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .grille-bord .large { grid-column: span 2; }
 @media (max-width: 920px) { .grille-bord { grid-template-columns: 1fr; } .grille-bord .large { grid-column: auto; } }
 
+/* Colonne de panneaux empilés (ex : Alertes + Dernier relevé à côté de la
+   courbe, sur le Bord). Réutilisable partout où .grille-bord sert. */
+.colonne-bord { display: flex; flex-direction: column; gap: 16px; }
+.compteur { font-family: var(--police-mono); font-size: 13px; color: var(--texte-discret); }
+
+.liste-alertes { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; }
+.alerte {
+  display: grid; grid-template-columns: 10px 1fr; column-gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--trait);
+}
+.alerte:last-child { border-bottom: 0; }
+.alerte-point { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--attention); }
+.alerte[data-gravite="critique"] .alerte-point { background: var(--critique); }
+.alerte[data-gravite="faible"] .alerte-point { background: var(--accent); }
+.alerte-titre { grid-column: 2; font-size: 15px; font-weight: 600; }
+.alerte-texte { grid-column: 2; font-size: 13px; color: var(--texte-discret); }
+
+.grille-bas { display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 800px) { .grille-bas { grid-template-columns: 1fr; } }
+
+/* Résumé du trajet (renvoie vers la carte complète sur navigation.html) */
+.trajet-pourcent { font-family: var(--police-mono); font-size: 28px; font-weight: 500; }
+.trajet-pourcent::after { content: " % du trajet"; font-size: 13px; font-weight: 400; color: var(--texte-discret); }
+.jauge { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--fond); overflow: hidden; }
+.jauge span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.trajet-bornes { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: var(--texte-discret); }
+
 /* Texte du journal : les "## " et "- " du modèle sont transformés en HTML
    par js/bord.js (voir formaterTexteJournal), stylés ici. */
 .journal-extrait h3 { margin: 16px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
@@ -254,5 +298,130 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .journal-extrait p { margin: 0 0 8px; font-size: 14px; }
 .journal-extrait ul { margin: 0 0 8px; padding-left: 20px; }
 .journal-extrait li { margin-bottom: 4px; font-size: 14px; }
+.journal-extrait .extrait-suite { margin: 0; color: var(--texte-discret); letter-spacing: 0.15em; }
+
+
+/* ============================================================
+   JOURNAL (journal.html) — styles propres à cette page.
+   ============================================================ */
+
+.grille-journal { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2.4fr); gap: 16px; align-items: start; }
+@media (max-width: 800px) { .grille-journal { grid-template-columns: 1fr; } }
+
+.liste-journaux { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.element-liste {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%; padding: 10px 12px;
+  text-align: left; cursor: pointer;
+  background: none; border: 1px solid transparent; border-radius: 8px;
+  color: var(--texte);
+  font-family: var(--police-texte);
+}
+.element-liste:hover { background: var(--survol); }
+.element-liste[aria-current="true"] { background: var(--survol); border-color: var(--trait); }
+.element-titre { font-weight: 600; font-size: 13px; }
+.element-sous { font-size: 12px; color: var(--texte-discret); }
+
+.journal-article { padding: 24px 28px; }
+.journal-entete { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--trait); }
+.journal-entete h1 { font-family: var(--police-titre); font-size: 22px; margin: 0; text-transform: none; letter-spacing: normal; }
+.journal-meta { margin: 4px 0 0; font-size: 12px; color: var(--texte-discret); }
+.journal-corps { max-width: 68ch; }
+.journal-corps h3 { margin: 20px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.journal-corps h3:first-child { margin-top: 0; }
+.journal-corps p { margin: 0 0 8px; font-size: 14px; }
+.journal-corps ul { margin: 0 0 8px; padding-left: 20px; }
+.journal-corps li { margin-bottom: 4px; font-size: 14px; }
+.note-equipage { margin-top: 16px; padding: 10px 12px; border-radius: 8px; background: var(--survol); font-size: 14px; }
+.note-equipage span { display: block; font-size: 12px; color: var(--texte-discret); margin-bottom: 2px; }
+
+
+/* ============================================================
+   INCIDENTS (incidents.html) — styles propres à cette page.
+   ============================================================ */
+
+/* La Description est la seule colonne où on veut que le texte revienne à
+   la ligne (le reste du tableau garde le white-space: nowrap commun). */
+td.col-description { white-space: normal; min-width: 220px; }
+
+.pastille[data-gravite="faible"] { background: var(--survol); color: var(--accent); }
+.pastille[data-gravite="moyenne"] { background: var(--attention-fond); color: var(--attention); }
+.pastille[data-gravite="critique"] { background: var(--critique-fond); color: var(--critique); }
+
+.pastille[data-statut-incident="ouvert"] { background: var(--attention-fond); color: var(--attention); }
+.pastille[data-statut-incident="en_cours"] { background: var(--survol); color: var(--accent); }
+.pastille[data-statut-incident="resolu"] { background: var(--ok-fond); color: var(--ok); }
+
+.pastille[data-statut-maintenance="en_cours"] { background: var(--survol); color: var(--accent); }
+.pastille[data-statut-maintenance="terminee"] { background: var(--ok-fond); color: var(--ok); }
+
+/* Formulaire "Déclarer un incident" — premier formulaire du site, la base
+   commune (.panneau, .bouton...) n'avait pas encore de style pour les champs. */
+.champs-cote-a-cote { display: flex; gap: 12px; }
+.champs-cote-a-cote .champ { flex: 1; }
+
+.champ { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 13px; color: var(--texte-discret); }
+.champ:last-of-type { margin-bottom: 0; }
+
+.champ select,
+.champ textarea {
+  font-family: var(--police-texte);
+  font-size: 14px;
+  color: var(--texte);
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+.champ textarea { resize: vertical; min-height: 80px; }
+.champ select:focus,
+.champ textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+.liste-maintenance { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.element-maintenance { padding-bottom: 12px; border-bottom: 1px solid var(--trait); }
+.element-maintenance:last-child { padding-bottom: 0; border-bottom: 0; }
+.element-maintenance-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.element-maintenance p { margin: 0; font-size: 14px; }
+.element-maintenance .note { font-size: 12px; margin-top: 4px; }
+
+
+/* ============================================================
+   ASSISTANT (assistant.html) — styles propres à cette page.
+   ============================================================ */
+
+.assistant-panneau { display: flex; flex-direction: column; min-height: 520px; height: calc(100vh - 220px); }
+
+.assistant-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
+
+.assistant-message { max-width: 70%; padding: 12px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+.assistant-message-bot { align-self: flex-start; background: var(--survol); border: 1px solid var(--trait); }
+.assistant-message-utilisateur { align-self: flex-end; background: var(--accent); color: #0A1119; }
+.assistant-message-attente { color: var(--texte-discret); }
+
+.assistant-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-top: 1px solid var(--trait); }
+.bouton-suggestion {
+  font-family: var(--police-texte);
+  font-size: 13px;
+  color: var(--texte-discret);
+  background: none;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.bouton-suggestion:hover { color: var(--texte); background: var(--survol); }
+
+.assistant-saisie { display: flex; gap: 10px; }
+.assistant-saisie input {
+  flex: 1;
+  font-family: var(--police-texte);
+  font-size: 14px;
+  color: var(--texte);
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.assistant-saisie input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
 
 

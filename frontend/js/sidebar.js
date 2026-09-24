@@ -33,10 +33,11 @@ function genererBarreLaterale(pageActive) {
   conteneur.innerHTML = boutons;
 }
 
-// En-tête du haut, commune à toutes les pages : logo + nom + heure en direct.
-// Volontairement limité au marco visuel pour l'instant : pas de "jour de
-// mission" (il faudrait une date de départ dans config.yaml) ni de bouton
-// crise (c'est le travail de l'épic 7, pas encore commencé).
+// En-tête du haut, commune à toutes les pages : logo + nom + jour de
+// mission / date bord / heure en direct.
+// "Jour de mission" et "Date bord" sont pour l'instant fixes (pas de date
+// de départ dans config.yaml) — à calculer plus tard si on ajoute ça.
+// Pas de bouton crise non plus (c'est le travail de l'épic 7, pas commencé).
 function genererEntete() {
   const conteneur = document.getElementById("entete");
   if (!conteneur) return;
@@ -54,9 +55,19 @@ function genererEntete() {
         <div class="marque-sous">Journal de bord</div>
       </div>
     </div>
-    <div class="entete-heure" >
-    <p class="entete-heure-texte">HEURE BORD</p>
-    <span id="entete-heure"></span>
+    <div class="entete-infos">
+      <div class="entete-heure">
+        <p class="entete-heure-texte">JOUR DE MISSION</p>
+        <span>1 284</span>
+      </div>
+      <div class="entete-heure">
+        <p class="entete-heure-texte">DATE BORD</p>
+        <span>26 sept. 2083</span>
+      </div>
+      <div class="entete-heure">
+        <p class="entete-heure-texte">HEURE BORD</p>
+        <span id="entete-heure"></span>
+      </div>
     </div>
   `;
 

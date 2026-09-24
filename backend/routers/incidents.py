@@ -1,7 +1,7 @@
 """Endpoints du module Incidents (section 4.3 du cahier des charges)."""
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 import models
@@ -27,6 +27,20 @@ def declarer_incident(donnee: schemas.IncidentIn, db: Session = Depends(get_db))
         statut=donnee.statut,
     )
     db.add(incident)
+    db.commit()
+    db.refresh(incident)
+    return incident
+
+
+@router.patch("/{incident_id}", response_model=schemas.IncidentOut)
+def changer_statut_incident(incident_id: int, donnee: schemas.IncidentStatutIn, db: Session = Depends(get_db)):
+    """Change le statut d'un incident : "Prendre en charge" -> en_cours,
+    "Marquer résolu" -> resolu (page Incidents, US-4.3)."""
+    incident = db.query(models.Incident).filter_by(id=incident_id).first()
+    if incident is None:
+        raise HTTPException(status_code=404, detail="Incident introuvable")
+
+    incident.statut = donnee.statut
     db.commit()
     db.refresh(incident)
     return incident

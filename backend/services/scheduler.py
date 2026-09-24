@@ -12,6 +12,7 @@ from config import config
 from database import SessionLocal
 from services.navigation import calculer_position_du_jour
 from services.dht22 import enregistrer_lecture_dht22
+from services.simulateur import simuler_oxygene, simuler_stocks, simuler_maintenance
 
 
 SCHEDULER_CONFIG = config["scheduler"]
@@ -60,6 +61,19 @@ def tache_lecture_dht22():
         enregistrer_lecture_dht22(db)
     finally:
         db.close()
+
+
+def tache_simulation():
+    """Génère les données simulées : oxygène, stocks, maintenance (STA-02)."""
+    db = SessionLocal()
+    try:
+        simuler_oxygene(db)
+        simuler_stocks(db)
+        simuler_maintenance(db)
+    finally:
+        db.close()
+
+
 def tache_capture_manuelle():
     """Prend une photo manuelle et l'enregistre avec son horodatage."""
 
@@ -119,6 +133,14 @@ def demarrer_scheduler():
         "interval",
         minutes=SCHEDULER_CONFIG["dht22_read_interval_minutes"],
         id="lecture_dht22",
+        replace_existing=True,
+    )
+
+    scheduler.add_job(
+        tache_simulation,
+        "interval",
+        minutes=SCHEDULER_CONFIG["simulation_interval_minutes"],
+        id="simulation",
         replace_existing=True,
     )
     scheduler.start()

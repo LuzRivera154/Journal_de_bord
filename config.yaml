@@ -21,6 +21,7 @@ scheduler:
   navigation_calculation_hour: 0 # NAV-01 : heure fixe du calcul de position quotidien (0-23)
   observation_interval_minutes: 60 # OBS-01 : intervalle des prises de vue automatiques
   dht22_read_interval_minutes: 15 # STA-01 : intervalle des relevés du capteur
+  simulation_interval_minutes: 20 # STA-02 : intervalle des données simulées
   journal_generation_hour: 22 # JRN-01 : heure fixe de génération quotidienne (0-23)
 
 alerts:
@@ -58,6 +59,12 @@ dht22:
   baud_rate: 9600
   read_timeout_seconds: 5
   secteur: "Pont" # secteur auquel ce capteur est rattaché (STA-01)
+
+# STA-02 : chaque simulateur peut être activé/désactivé indépendamment.
+simulateurs:
+  oxygene: true
+  stocks: true
+  maintenance: true
 
 # Secteurs créés au premier démarrage si la table est vide.
 secteurs_initiaux:

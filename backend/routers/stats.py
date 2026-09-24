@@ -9,6 +9,7 @@ import models
 import schemas
 from database import get_db
 from services.dht22 import enregistrer_lecture_dht22
+from services.simulateur import simuler_oxygene, simuler_stocks, simuler_maintenance
 
 router = APIRouter(prefix="/api/stats", tags=["statistiques"])
 
@@ -23,6 +24,25 @@ def lire_dht22_maintenant(db: Session = Depends(get_db)):
     """
     mesure_temperature, mesure_humidite = enregistrer_lecture_dht22(db)
     return [mesure_temperature, mesure_humidite]
+
+
+@router.post("/simuler", response_model=list[schemas.MesureOut])
+def simuler_maintenant(db: Session = Depends(get_db)):
+    """Déclenche une génération immédiate des données simulées (STA-02) :
+    oxygène, stocks, et (avec une petite chance) une mise en maintenance.
+
+    Se lance aussi automatiquement toutes les 20 min via le scheduler — cet
+    endpoint sert surtout à tester sans attendre.
+    """
+    mesures = simuler_oxygene(db) + simuler_stocks(db)
+    simuler_maintenance(db)  # pas toujours un résultat, exclu de la réponse
+    return mesures
+
+
+@router.get("/maintenance", response_model=list[schemas.MaintenanceOut])
+def lister_maintenance(db: Session = Depends(get_db)):
+    """Secteurs en maintenance (en cours ou passés), le plus récent en premier."""
+    return db.query(models.Maintenance).order_by(models.Maintenance.debut.desc()).all()
 
 
 @router.get("/mesures", response_model=list[schemas.MesureOut])

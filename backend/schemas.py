@@ -70,6 +70,17 @@ class PositionOut(BaseModel):
     methode: str
 
 
+class MaintenanceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    id_secteur: Optional[int]
+    debut: datetime
+    fin_prevue: Optional[datetime]
+    motif: str
+    statut: str
+
+
 class DestinationOut(BaseModel):
     nom: str
     x: float

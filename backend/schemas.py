@@ -114,6 +114,19 @@ class JournalOut(BaseModel):
     id_utilisateur: Optional[int]
 
 
+class PopulationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    horodatage: datetime
+    nombre_personnes: int
+    source: str
+
+
+class PopulationIn(BaseModel):
+    nombre_personnes: int
+
+
 class NoteIn(BaseModel):
     texte: str
 

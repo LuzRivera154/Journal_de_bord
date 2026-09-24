@@ -227,8 +227,9 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .pastille[data-source="simulee"] { background: var(--attention-fond); color: var(--attention); }
 
 /* Petites fiches d'indicateurs en haut de page (repris du style de la maquette) */
-.grille-fiches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-@media (max-width: 700px) { .grille-fiches { grid-template-columns: 1fr; } }
+.grille-fiches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 920px) { .grille-fiches { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 500px) { .grille-fiches { grid-template-columns: 1fr; } }
 
 .fiche {
   display: flex; flex-direction: column; gap: 4px;
@@ -239,6 +240,7 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 }
 .fiche-libelle { font-size: 12px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--texte-discret); }
 .fiche-valeur { font-family: var(--police-mono); font-size: 30px; font-weight: 500; line-height: 1.15; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fiche-valeur small { margin-left: 4px; font-size: 14px; font-weight: 400; font-family: var(--police-texte); color: var(--texte-discret); }
 .fiche-sous { margin: 0; font-size: 12px; color: var(--texte-discret); }
 
 .grille-bord { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }

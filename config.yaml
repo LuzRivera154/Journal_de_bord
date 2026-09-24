@@ -66,6 +66,14 @@ simulateurs:
   stocks: true
   maintenance: true
 
+# STA-04 : d'où vient l'effectif à bord.
+# "simulee" : générée ici automatiquement. "reelle" : envoyée par un autre
+# projet (la caméra à reconnaissance faciale) via POST /api/population.
+population:
+  source: "simulee"
+  simulee_min: 8
+  simulee_max: 14
+
 # Secteurs créés au premier démarrage si la table est vide.
 secteurs_initiaux:
   - "Pont"

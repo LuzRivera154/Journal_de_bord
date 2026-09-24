@@ -13,6 +13,7 @@ from database import SessionLocal
 from services.navigation import calculer_position_du_jour
 from services.dht22 import enregistrer_lecture_dht22
 from services.simulateur import simuler_oxygene, simuler_stocks, simuler_maintenance
+from services.population import simuler_population
 
 
 SCHEDULER_CONFIG = config["scheduler"]
@@ -70,6 +71,7 @@ def tache_simulation():
         simuler_oxygene(db)
         simuler_stocks(db)
         simuler_maintenance(db)
+        simuler_population(db)
     finally:
         db.close()
 

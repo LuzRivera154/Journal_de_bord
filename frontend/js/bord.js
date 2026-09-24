@@ -179,9 +179,24 @@ async function chargerFicheOxygene() {
   }
 }
 
+// Effectif à bord (US-4.4).
+async function chargerFichePopulation() {
+  try {
+    const reponse = await fetch("/api/population/");
+    if (!reponse.ok) return; // 404 = pas encore de donnée, laisse "n/d" affiché
+
+    const population = await reponse.json();
+    document.getElementById("fiche-population").innerHTML = population.nombre_personnes + " <small>à bord</small>";
+    document.getElementById("fiche-population-sous").textContent = "source : " + population.source;
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
 function rafraichirTout() {
   chargerDernieresMesuresDht22();
   chargerFicheOxygene();
+  chargerFichePopulation();
   chargerCourbe();
 }
 

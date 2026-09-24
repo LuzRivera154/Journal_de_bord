@@ -18,13 +18,34 @@
     <div class="entete-page">
       <h1>Bord</h1>
     </div>
-    <p class="note">Cette page n'est pas encore construite — voir <a href="navigation.html" style="color:var(--accent)">Navigation</a> en attendant.</p>
+    <p class="subtitule">En dessous : les dernières mesures du capteur DHT22 (STA-01), pour vérifier que ça marche.</p>
+
+    <div class="grille-bord">
+      <section class="panneau large">
+        <div class="panneau-tete">
+          <h2>Atmosphère sur 24 heures</h2>
+          <div class="segments" id="choix-courbe">
+            <button type="button" data-type="temperature" aria-pressed="true">Température</button>
+            <button type="button" data-type="humidite" aria-pressed="false">Humidité</button>
+          </div>
+        </div>
+        <div class="courbe"><canvas id="courbe-bord"></canvas></div>
+        <p class="note">Capteur DHT22, secteur <span id="courbe-secteur"></span> — relevé toutes les <span id="courbe-intervalle"></span> minutes.</p>
+      </section>
+
+      <section class="panneau">
+        <div class="panneau-tete"><h2>Dernier relevé</h2><span class="pastille" id="pastille-source-dht22"></span></div>
+        <dl class="donnees">
+          <div><dt>Température</dt><dd id="dht22-temperature">n/d</dd></div>
+          <div><dt>Humidité</dt><dd id="dht22-humidite">n/d</dd></div>
+          <div><dt>Heure</dt><dd id="dht22-date">n/d</dd></div>
+        </dl>
+      </section>
+    </div>
   </main>
 </div>
 <script src="js/sidebar.js"></script>
-<script>
-  genererBarreLaterale("bord");
-  genererEntete();
-</script>
+<script src="js/vendor/chart.umd.min.js"></script>
+<script src="js/bord.js"></script>
 </body>
 </html>

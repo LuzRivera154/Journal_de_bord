@@ -12,6 +12,7 @@ import serial
 
 from config import config
 from models import Mesure, Secteur
+from services.alertes import verifier_seuil
 
 DHT22_CONFIG = config["dht22"]
 
@@ -64,4 +65,10 @@ def enregistrer_lecture_dht22(db):
     db.commit()
     db.refresh(mesure_temperature)
     db.refresh(mesure_humidite)
+
+    # Si la température ou l'humidité sort de la plage normale, ça crée un
+    # incident tout seul (US-4.3, création automatique).
+    verifier_seuil(mesure_temperature, db)
+    verifier_seuil(mesure_humidite, db)
+
     return mesure_temperature, mesure_humidite

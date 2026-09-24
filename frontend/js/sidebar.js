@@ -34,10 +34,9 @@ function genererBarreLaterale(pageActive) {
 }
 
 // En-tête du haut, commune à toutes les pages : logo + nom + jour de
-// mission / date bord / heure en direct.
+// mission / date bord / heure en direct + bouton crise (Épic 7).
 // "Jour de mission" et "Date bord" sont pour l'instant fixes (pas de date
 // de départ dans config.yaml) — à calculer plus tard si on ajoute ça.
-// Pas de bouton crise non plus (c'est le travail de l'épic 7, pas commencé).
 function genererEntete() {
   const conteneur = document.getElementById("entete");
   if (!conteneur) return;
@@ -49,34 +48,105 @@ function genererEntete() {
         <circle cx="16" cy="16" r="14.5"/>
         <path d="M16 27V8M16 14l-6-5M16 14l6-5M16 20l-5-3.5M16 20l5-3.5M11 27h10"/>
       </svg>
-      
+
       <div>
         <div class="marque-nom">Utilisateur</div>
         <div class="marque-sous">Journal de bord</div>
       </div>
     </div>
-    <div class="entete-infos">
-      <div class="entete-heure">
-        <p class="entete-heure-texte">JOUR DE MISSION</p>
-        <span>1 284</span>
-      </div>
-      <div class="entete-heure">
-        <p class="entete-heure-texte">DATE BORD</p>
-        <span>26 sept. 2083</span>
-      </div>
-      <div class="entete-heure">
-        <p class="entete-heure-texte">HEURE BORD</p>
-        <span id="entete-heure"></span>
+    <div class="entete-droite">
+      <button type="button" class="bouton-crise" id="bouton-crise">Simuler une crise</button>
+      <div class="entete-infos">
+        <div class="entete-heure">
+          <p class="entete-heure-texte">JOUR DE MISSION</p>
+          <span>1 284</span>
+        </div>
+        <div class="entete-heure">
+          <p class="entete-heure-texte">DATE BORD</p>
+          <span>26 sept. 2083</span>
+        </div>
+        <div class="entete-heure">
+          <p class="entete-heure-texte">HEURE BORD</p>
+          <span id="entete-heure"></span>
+        </div>
       </div>
     </div>
   `;
 
   mettreAJourHeure();
   setInterval(mettreAJourHeure, 1000);
+  initialiserCrise();
 }
 
 function mettreAJourHeure() {
   const el = document.getElementById("entete-heure");
   if (!el) return;
   el.textContent = new Date().toLocaleTimeString("fr-FR");
+}
+
+// Scénario de crise (Épic 7) : bouton dans l'entête + bandeau rouge en
+// haut de la page pendant que la crise est active. L'état vient toujours
+// du backend (table crises) — rien n'est gardé côté navigateur, sinon
+// deux onglets ouverts en même temps se contrediraient.
+async function initialiserCrise() {
+  const bouton = document.getElementById("bouton-crise");
+  if (!bouton) return;
+
+  async function rafraichir() {
+    try {
+      const reponse = await fetch("/api/crise/");
+      const crise = await reponse.json();
+      afficherEtatCrise(crise);
+    } catch (erreur) {
+      console.error(erreur);
+    }
+  }
+
+  bouton.addEventListener("click", async () => {
+    const actif = bouton.classList.contains("actif");
+    bouton.disabled = true;
+    try {
+      await fetch("/api/crise/" + (actif ? "desactiver" : "activer"), { method: "POST" });
+      await rafraichir();
+    } catch (erreur) {
+      console.error(erreur);
+    } finally {
+      bouton.disabled = false;
+    }
+  });
+
+  rafraichir();
+}
+
+function afficherEtatCrise(crise) {
+  const bouton = document.getElementById("bouton-crise");
+  const actif = crise !== null;
+
+  bouton.textContent = actif ? "Arrêter la simulation" : "Simuler une crise";
+  bouton.classList.toggle("actif", actif);
+
+  const conteneur = document.querySelector(".contenu");
+  if (!conteneur) return;
+
+  let banniere = document.getElementById("banniere-crise");
+
+  if (!actif) {
+    if (banniere) banniere.remove();
+    return;
+  }
+
+  if (!banniere) {
+    banniere = document.createElement("div");
+    banniere.className = "banniere-crise";
+    banniere.id = "banniere-crise";
+    banniere.innerHTML = `
+      <span class="banniere-crise-point"></span>
+      <div>
+        <strong>CRISE SIMULÉE EN COURS</strong>
+        <p>Dépressurisation détectée, caméra d'observation indisponible. La navigation continue par estime seule.</p>
+      </div>
+      <a class="bouton bouton-petit" href="incidents.html">Voir les incidents</a>
+    `;
+    conteneur.insertBefore(banniere, conteneur.firstChild);
+  }
 }

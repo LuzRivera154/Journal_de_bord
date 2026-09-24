@@ -12,7 +12,7 @@ from config import config
 from database import engine, SessionLocal, Base, get_db
 import models
 import schemas
-from routers import navigation, stats, incidents, population, journal
+from routers import assistant, navigation, stats, incidents, population, journal
 from services.scheduler import (
     demarrer_scheduler,
     modifier_intervalle_capture,
@@ -36,6 +36,7 @@ app.include_router(stats.router)
 app.include_router(incidents.router)
 app.include_router(population.router)
 app.include_router(journal.router)
+app.include_router(assistant.router)
 
 
 

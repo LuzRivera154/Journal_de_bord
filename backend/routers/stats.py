@@ -57,3 +57,24 @@ def lister_mesures(type: str | None = None, heures: int | None = None, db: Sessi
     if heures:
         requete = requete.filter(models.Mesure.horodatage >= datetime.utcnow() - timedelta(hours=heures))
     return requete.order_by(models.Mesure.horodatage.desc()).limit(200).all()
+
+
+@router.get("/dernieres-mesures", response_model=list[schemas.MesureOut])
+def lister_dernieres_mesures(db: Session = Depends(get_db)):
+    """Retourne la dernière mesure disponible pour chaque type."""
+    types = db.query(models.Mesure.type).distinct().all()
+
+    resultats = []
+
+    for (type_mesure,) in types:
+        mesure = (
+            db.query(models.Mesure)
+            .filter(models.Mesure.type == type_mesure)
+            .order_by(models.Mesure.horodatage.desc())
+            .first()
+        )
+
+        if mesure:
+            resultats.append(mesure)
+
+    return resultats

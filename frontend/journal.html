@@ -25,11 +25,16 @@
         <button class="bouton bouton-principal" type="button" id="bouton-generer" style="width:100%; margin-bottom:12px">Rédiger le journal du jour</button>
         <p class="note" id="message-generation" hidden></p>
 
+        <p class="astuce-recherche">Cherchez soit un jour exact, soit une période (du … au …) — pas les deux en même temps.</p>
+
+        <label class="champ">
+          <span>Jour exact</span>
+          <select id="recherche-date-select">
+            <option value="">— toutes les dates —</option>
+          </select>
+        </label>
+
         <form class="recherche-journal" id="recherche-journal">
-          <label class="champ">
-            <span>Date exacte</span>
-            <input type="date" id="recherche-date" name="date">
-          </label>
           <div class="champs-cote-a-cote">
             <label class="champ">
               <span>Du</span>
@@ -41,7 +46,7 @@
             </label>
           </div>
           <div class="recherche-journal-boutons">
-            <button class="bouton bouton-petit" type="submit">Rechercher</button>
+            <button class="bouton bouton-petit" type="submit">Rechercher une période</button>
             <button class="bouton bouton-petit" type="button" id="bouton-reinitialiser">Réinitialiser</button>
           </div>
         </form>

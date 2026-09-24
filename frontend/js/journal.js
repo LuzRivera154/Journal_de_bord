@@ -64,6 +64,35 @@ async function chargerJournal(id) {
   }
 }
 
+function formatDateCourte(iso) {
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+// Remplit le menu "Aller à une date" avec les dates qui ont vraiment un
+// journal (pas de date au hasard) — une seule fois au chargement de la
+// page, indépendamment de la recherche en cours.
+async function remplirSelectDates() {
+  try {
+    const reponse = await fetch("/api/journal/");
+    const journaux = await reponse.json();
+
+    // journal.date est en UTC (ex: "2026-09-24T12:32:05...") — on garde
+    // juste les 10 premiers caractères pour avoir "AAAA-MM-JJ", pareil que
+    // ce que le filtre ?date=... attend côté backend.
+    const datesUniques = [...new Set(journaux.map((j) => j.date.slice(0, 10)))].sort().reverse();
+
+    const select = document.getElementById("recherche-date-select");
+    datesUniques.forEach((date) => {
+      const option = document.createElement("option");
+      option.value = date;
+      option.textContent = formatDateCourte(date);
+      select.appendChild(option);
+    });
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
 async function chargerListeJournaux(idASelectionner, parametresRecherche) {
   try {
     const requete = new URLSearchParams(parametresRecherche || {});
@@ -72,8 +101,16 @@ async function chargerListeJournaux(idASelectionner, parametresRecherche) {
     const liste = document.getElementById("liste-journaux");
 
     if (journaux.length === 0) {
-      liste.innerHTML = '<li><p class="vide">Aucun journal pour cette recherche.</p></li>';
-      document.getElementById("journal-article").innerHTML = '<p class="vide">Aucun journal ne correspond à cette recherche.</p>';
+      const parametres = parametresRecherche || {};
+      let message = "Aucun journal pour l'instant.";
+      if (parametres.date) {
+        message = "Aucun journal disponible ce jour-là.";
+      } else if (parametres.du || parametres.au) {
+        message = "Aucun journal disponible pour cette période.";
+      }
+
+      liste.innerHTML = '<li><p class="vide">' + message + "</p></li>";
+      document.getElementById("journal-article").innerHTML = '<p class="vide">' + message + "</p>";
       return;
     }
 
@@ -121,29 +158,34 @@ document.getElementById("bouton-generer").addEventListener("click", async () => 
   }
 });
 
-// Recherche par date exacte OU par plage (du/au) — si la date exacte est
-// remplie, elle prime et la plage est ignorée (US-5.4).
+// Date exacte : menu déroulant, la liste se met à jour dès qu'on choisit
+// une date (pas besoin de bouton) — US-5.4, critère 1.
+document.getElementById("recherche-date-select").addEventListener("change", (evenement) => {
+  const date = evenement.target.value;
+  chargerListeJournaux(undefined, date ? { date: date } : {});
+});
+
+// Plage de dates : du/au, avec son propre bouton "Rechercher une plage" —
+// US-5.4, critère 2. Les deux recherches sont indépendantes.
 document.getElementById("recherche-journal").addEventListener("submit", (evenement) => {
   evenement.preventDefault();
 
-  const date = document.getElementById("recherche-date").value;
   const du = document.getElementById("recherche-du").value;
   const au = document.getElementById("recherche-au").value;
 
   const parametres = {};
-  if (date) {
-    parametres.date = date;
-  } else {
-    if (du) parametres.du = du;
-    if (au) parametres.au = au;
-  }
+  if (du) parametres.du = du;
+  if (au) parametres.au = au;
 
+  document.getElementById("recherche-date-select").value = ""; // les deux recherches ne se cumulent pas
   chargerListeJournaux(undefined, parametres);
 });
 
 document.getElementById("bouton-reinitialiser").addEventListener("click", () => {
   document.getElementById("recherche-journal").reset();
+  document.getElementById("recherche-date-select").value = "";
   chargerListeJournaux();
 });
 
+remplirSelectDates();
 chargerListeJournaux();

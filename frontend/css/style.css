@@ -308,6 +308,17 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .grille-journal { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2.4fr); gap: 16px; align-items: start; }
 @media (max-width: 800px) { .grille-journal { grid-template-columns: 1fr; } }
 
+.astuce-recherche {
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--survol);
+  color: var(--texte-discret);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .recherche-journal { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--trait); }
 .recherche-journal-boutons { display: flex; gap: 8px; margin-top: 4px; }
 .recherche-journal-boutons .bouton { flex: 1; }

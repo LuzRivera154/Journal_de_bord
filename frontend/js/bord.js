@@ -105,7 +105,12 @@ function moyenneParTanda(points) {
 
 async function chargerCourbe() {
   try {
-    const reponse = await fetch(`/api/stats/mesures?type=${typeCourbeActif}&heures=24`);
+    // Température/humidité : uniquement le Pont (capteur DHT22), sinon la
+    // courbe se retrouve mélangée avec les valeurs simulées des autres
+    // secteurs. L'oxygène, lui, moyenne volontairement tous les secteurs
+    // (voir moyenneParTanda ci-dessus).
+    const filtreSecteur = typeCourbeActif === "oxygene" ? "" : "&secteur=Pont";
+    const reponse = await fetch(`/api/stats/mesures?type=${typeCourbeActif}&heures=24${filtreSecteur}`);
     const mesures = await reponse.json();
     // L'API renvoie la plus récente en premier ; la courbe veut l'ordre chronologique.
     let points = [...mesures].reverse();
@@ -129,8 +134,8 @@ document.getElementById("choix-courbe").addEventListener("click", (evenement) =>
 async function chargerDernieresMesuresDht22() {
   try {
     const [reponseTemp, reponseHumidite] = await Promise.all([
-      fetch("/api/stats/mesures?type=temperature"),
-      fetch("/api/stats/mesures?type=humidite"),
+      fetch("/api/stats/mesures?type=temperature&secteur=Pont"),
+      fetch("/api/stats/mesures?type=humidite&secteur=Pont"),
     ]);
     const temperatures = await reponseTemp.json();
     const humidites = await reponseHumidite.json();
@@ -352,6 +357,74 @@ async function chargerTrajet() {
   }
 }
 
+// Panneau "Secteurs" : un snapshot par secteur (O2, CO2, température,
+// humidité, pression, équipage), avec une pastille Nominal/Maintenance.
+function texteValeur(valeur, unite) {
+  return valeur === null || valeur === undefined ? "n/d" : valeur + " " + unite;
+}
+
+async function chargerSecteursResume() {
+  try {
+    const reponse = await fetch("/api/stats/secteurs");
+    const secteurs = await reponse.json();
+    const conteneur = document.getElementById("grille-secteurs");
+
+    if (secteurs.length === 0) {
+      conteneur.innerHTML = '<p class="vide">Aucune donnée de secteur pour l\'instant.</p>';
+      return;
+    }
+
+    const enMaintenance = secteurs.filter((s) => s.statut === "maintenance").length;
+    document.getElementById("compteur-secteurs").textContent = (secteurs.length - enMaintenance) + " sur " + secteurs.length + " nominaux";
+
+    conteneur.innerHTML = secteurs.map((secteur) => `
+      <div class="carte-secteur">
+        <div class="carte-secteur-tete">
+          <strong>${secteur.nom}</strong>
+          <span class="pastille" data-statut-secteur="${secteur.statut}">${secteur.statut === "maintenance" ? "Maintenance" : "Nominal"}</span>
+        </div>
+        <dl class="donnees-secteur">
+          <div><dt>O₂</dt><dd>${texteValeur(secteur.oxygene, "%")}</dd></div>
+          <div><dt>CO₂</dt><dd>${texteValeur(secteur.co2, "ppm")}</dd></div>
+          <div><dt>Temp.</dt><dd>${texteValeur(secteur.temperature, "°C")}</dd></div>
+          <div><dt>Hum.</dt><dd>${texteValeur(secteur.humidite, "%")}</dd></div>
+          <div><dt>Pression</dt><dd>${texteValeur(secteur.pression, "kPa")}</dd></div>
+          <div><dt>Équipage</dt><dd>${secteur.occupation === null ? "n/d" : secteur.occupation}</dd></div>
+        </dl>
+      </div>
+    `).join("");
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
+// Panneau "Réserves et besoins" : jauges avec jours restants au rythme de
+// consommation actuel (données inventées pour la démo, voir config.yaml).
+async function chargerReserves() {
+  try {
+    const reponse = await fetch("/api/reserves/");
+    const reserves = await reponse.json();
+    const liste = document.getElementById("liste-reserves");
+
+    if (reserves.length === 0) {
+      liste.innerHTML = '<li><p class="vide">Aucune donnée pour l\'instant.</p></li>';
+      return;
+    }
+
+    liste.innerHTML = reserves.map((reserve) => {
+      const pourcentage = Math.min(100, Math.max(0, (reserve.quantite_actuelle / reserve.quantite_initiale) * 100));
+      const niveau = pourcentage < 20 ? "critique" : pourcentage < 50 ? "attention" : "ok";
+      return "<li class=\"element-reserve\">"
+        + "<div class=\"element-reserve-tete\"><span>" + reserve.libelle + "</span><span class=\"element-reserve-jours\">" + Math.round(reserve.jours_restants) + " j</span></div>"
+        + "<div class=\"jauge\" data-niveau=\"" + niveau + "\"><span style=\"width:" + pourcentage + "%\"></span></div>"
+        + "<p class=\"note\">" + reserve.quantite_actuelle.toLocaleString("fr-FR") + " " + reserve.unite + ", consommation " + reserve.consommation_par_jour + " par jour</p>"
+        + "</li>";
+    }).join("");
+  } catch (erreur) {
+    console.error(erreur);
+  }
+}
+
 function rafraichirTout() {
   chargerDernieresMesuresDht22();
   chargerFicheOxygene();
@@ -360,6 +433,8 @@ function rafraichirTout() {
   chargerCourbe();
   chargerDernierJournal();
   chargerTrajet();
+  chargerSecteursResume();
+  chargerReserves();
 }
 
 chargerSecteurs();

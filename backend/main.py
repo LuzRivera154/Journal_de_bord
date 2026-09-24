@@ -12,7 +12,7 @@ from config import config
 from database import engine, SessionLocal, Base, get_db
 import models
 import schemas
-from routers import navigation, stats, incidents, population, journal, crise
+from routers import navigation, stats, incidents, population, journal, crise, observations, reserves
 from services.scheduler import (
     demarrer_scheduler,
     modifier_intervalle_capture,
@@ -37,6 +37,8 @@ app.include_router(incidents.router)
 app.include_router(population.router)
 app.include_router(journal.router)
 app.include_router(crise.router)
+app.include_router(observations.router)
+app.include_router(reserves.router)
 
 
 
@@ -44,6 +46,7 @@ app.include_router(crise.router)
 def au_demarrage():
     Base.metadata.create_all(bind=engine)
     _creer_secteurs_initiaux()
+    _creer_reserves_initiales()
     demarrer_scheduler()
 
 
@@ -54,6 +57,19 @@ def _creer_secteurs_initiaux():
         if db.query(models.Secteur).count() == 0:
             for nom in config["secteurs_initiaux"]:
                 db.add(models.Secteur(nom=nom))
+            db.commit()
+    finally:
+        db.close()
+
+
+def _creer_reserves_initiales():
+    """Crée les réserves de config.yaml au premier démarrage, si la table
+    est vide (panneau "Réserves et besoins" du Bord)."""
+    db = SessionLocal()
+    try:
+        if db.query(models.Reserve).count() == 0:
+            for type_reserve, donnees in config["reserves"].items():
+                db.add(models.Reserve(type=type_reserve, quantite_actuelle=donnees["quantite_initiale"]))
             db.commit()
     finally:
         db.close()

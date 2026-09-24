@@ -13,6 +13,32 @@ class SecteurOut(BaseModel):
     description: Optional[str]
 
 
+class SecteurResumeOut(BaseModel):
+    """Snapshot d'un secteur pour le panneau "Secteurs" du Bord — pas
+    directement une table, construit à partir des dernières mesures."""
+    id: int
+    nom: str
+    oxygene: Optional[float]
+    co2: Optional[float]
+    temperature: Optional[float]
+    humidite: Optional[float]
+    pression: Optional[float]
+    occupation: Optional[int]
+    statut: str  # nominal | maintenance
+
+
+class ReserveOut(BaseModel):
+    """État d'une réserve (eau, nourriture...) pour le panneau "Réserves et
+    besoins" du Bord. jours_restants est calculé, pas stocké."""
+    type: str
+    libelle: str
+    quantite_actuelle: float
+    quantite_initiale: float
+    unite: str
+    consommation_par_jour: float
+    jours_restants: float
+
+
 class MesureIn(BaseModel):
     """Format d'échange défini section 10 du cahier des charges.
 
@@ -114,6 +140,7 @@ class ObservationOut(BaseModel):
     ascension_droite: Optional[float]
     declinaison: Optional[float]
     constellations_detectees: Optional[str]
+    etoiles_detectees: Optional[str]
     statut_analyse: str
 
 

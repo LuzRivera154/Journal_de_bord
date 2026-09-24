@@ -59,6 +59,7 @@ class Observation(Base):
     ascension_droite = Column(Float, nullable=True)
     declinaison = Column(Float, nullable=True)
     constellations_detectees = Column(String, nullable=True)  # liste stockée en JSON (texte)
+    etoiles_detectees = Column(String, nullable=True)  # liste de points {x, y, taille} en JSON (texte)
     statut_analyse = Column(String, default="en_attente")  # reussi | echec | en_attente
 
 
@@ -73,6 +74,18 @@ class Position(Base):
     vitesse = Column(Float)
     incertitude = Column(Float, default=0.0)
     methode = Column(String, default="estime")  # estime | recalage
+
+
+class Reserve(Base):
+    """État actuel des réserves générales (eau, nourriture...), pour le
+    panneau "Réserves et besoins" du Bord. Pas dans les 9 tables du cahier
+    des charges — une ligne par réserve, mise à jour au fil du temps
+    (pas un historique comme Mesure, juste l'état courant)."""
+    __tablename__ = "reserves"
+
+    id = Column(Integer, primary_key=True)
+    type = Column(String, unique=True)  # eau | nourriture | lioh | azote (voir config.yaml)
+    quantite_actuelle = Column(Float)
 
 
 class Population(Base):

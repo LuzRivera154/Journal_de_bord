@@ -330,6 +330,32 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .trajet-pourcent::after { content: " % du trajet"; font-size: 13px; font-weight: 400; color: var(--texte-discret); }
 .jauge { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--fond); overflow: hidden; }
 .jauge span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.jauge[data-niveau="ok"] span { background: var(--ok); }
+.jauge[data-niveau="attention"] span { background: var(--attention); }
+.jauge[data-niveau="critique"] span { background: var(--critique); }
+
+/* Panneau "Secteurs" du Bord */
+.grille-secteurs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .grille-secteurs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .grille-secteurs { grid-template-columns: 1fr; } }
+
+.carte-secteur { padding: 12px 14px; background: var(--fond); border: 1px solid var(--trait); border-radius: 8px; }
+.carte-secteur-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.carte-secteur-tete strong { font-size: 15px; }
+
+.donnees-secteur { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; margin: 0; }
+.donnees-secteur div { display: flex; justify-content: space-between; gap: 8px; }
+.donnees-secteur dt { color: var(--texte-discret); font-size: 12px; }
+.donnees-secteur dd { margin: 0; font-family: var(--police-mono); font-size: 13px; }
+
+.pastille[data-statut-secteur="nominal"] { background: var(--ok-fond); color: var(--ok); }
+.pastille[data-statut-secteur="maintenance"] { background: var(--survol); color: var(--accent); }
+
+/* Panneau "Réserves et besoins" du Bord */
+.liste-reserves { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.element-reserve-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 14px; }
+.element-reserve-jours { font-family: var(--police-mono); color: var(--texte-discret); }
+.element-reserve .note { margin: 6px 0 0; font-size: 12px; }
 .trajet-bornes { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: var(--texte-discret); }
 
 /* Texte du journal : les "## " et "- " du modèle sont transformés en HTML
@@ -442,6 +468,16 @@ td.col-description { white-space: normal; min-width: 220px; }
 .element-maintenance-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .element-maintenance p { margin: 0; font-size: 14px; }
 .element-maintenance .note { font-size: 12px; margin-top: 4px; }
+
+.liste-observations { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.element-observation { padding-bottom: 12px; border-bottom: 1px solid var(--trait); }
+.element-observation:last-child { padding-bottom: 0; border-bottom: 0; }
+.element-observation-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-family: var(--police-mono); font-size: 13px; color: var(--texte-discret); }
+.element-observation p { margin: 0; font-size: 14px; }
+
+.pastille[data-statut-observation="reussi"] { background: var(--ok-fond); color: var(--ok); }
+.pastille[data-statut-observation="echec"] { background: var(--critique-fond); color: var(--critique); }
+.pastille[data-statut-observation="en_attente"] { background: var(--attention-fond); color: var(--attention); }
 
 
 /* ============================================================

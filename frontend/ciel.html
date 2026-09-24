@@ -25,6 +25,14 @@
       <button class="bouton bouton-principal" type="button" id="capture-manuelle">Prendre une photo</button>
       <p class="note" id="message-capture"></p>
     </section>
+
+    <section class="panneau" style="margin-top:16px">
+      <div class="panneau-tete"><h2>Observations</h2></div>
+      <p class="note">Détection des étoiles par vision par ordinateur (OpenCV, en local) — l'identification de la zone du ciel viendra dans une étape suivante.</p>
+      <ul class="liste-observations" id="liste-observations">
+        <li><p class="vide">Aucune observation pour l'instant.</p></li>
+      </ul>
+    </section>
   </main>
 </div>
 <script src="js/sidebar.js"></script>
@@ -33,5 +41,6 @@
   genererEntete();
 </script>
 <script src="js/capture.js"></script>
+<script src="js/ciel.js"></script>
 </body>
 </html>

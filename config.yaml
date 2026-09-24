@@ -65,6 +65,34 @@ simulateurs:
   oxygene: true
   stocks: true
   maintenance: true
+  secteurs: true # CO2, pression, température, humidité et occupation par secteur (panneau "Secteurs" du Bord)
+  reserves: true # fait descendre les réserves ci-dessous au fil du temps (panneau "Réserves et besoins")
+
+# Réserves générales du vaisseau, affichées sur le panneau "Réserves et
+# besoins" du Bord. Aucun capteur réel derrière : quantités et
+# consommation inventées pour la démo, qui descendent au fil du temps
+# (voir services/simulateur.py, simuler_reserves).
+reserves:
+  eau:
+    libelle: "Eau potable"
+    quantite_initiale: 18400
+    unite: "L"
+    consommation_par_jour: 310
+  nourriture:
+    libelle: "Rations alimentaires"
+    quantite_initiale: 2150
+    unite: "rations"
+    consommation_par_jour: 36
+  lioh:
+    libelle: "Cartouches LiOH (CO2)"
+    quantite_initiale: 14
+    unite: "cartouches"
+    consommation_par_jour: 0.5
+  azote:
+    libelle: "Réserve d'azote"
+    quantite_initiale: 312
+    unite: "kg"
+    consommation_par_jour: 2.1
 
 # STA-04 : d'où vient l'effectif à bord.
 # "simulee" : générée ici automatiquement. "reelle" : envoyée par un autre

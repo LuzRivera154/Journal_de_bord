@@ -76,7 +76,7 @@ body {
 
 .marque { display: flex; align-items: center; gap: 10px; }
 .marque-logo { width: 40px; height: 40px; fill: none; stroke: var(--accent); stroke-width: 1.6; }
-.marque-nom { font-family: var(--police-titre); font-weight: 700; font-size: 20px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
+.marque-nom { font-family: var(--police-titre); font-weight: 700; font-size: 18px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.2; }
 .marque-sous { font-size: 16px; color: var(--texte-discret); }
 
 .entete-infos { display: flex; align-items: center; gap: 24px; }
@@ -308,6 +308,21 @@ th { color: var(--texte-discret); font-weight: 500; text-transform: uppercase; f
 .grille-journal { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2.4fr); gap: 16px; align-items: start; }
 @media (max-width: 800px) { .grille-journal { grid-template-columns: 1fr; } }
 
+.astuce-recherche {
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  background: var(--survol);
+  color: var(--texte-discret);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.recherche-journal { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--trait); }
+.recherche-journal-boutons { display: flex; gap: 8px; margin-top: 4px; }
+.recherche-journal-boutons .bouton { flex: 1; }
+
 .liste-journaux { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .element-liste {
   display: flex; flex-direction: column; gap: 2px;
@@ -364,7 +379,8 @@ td.col-description { white-space: normal; min-width: 220px; }
 .champ:last-of-type { margin-bottom: 0; }
 
 .champ select,
-.champ textarea {
+.champ textarea,
+.champ input {
   font-family: var(--police-texte);
   font-size: 14px;
   color: var(--texte);
@@ -372,10 +388,12 @@ td.col-description { white-space: normal; min-width: 220px; }
   border: 1px solid var(--trait);
   border-radius: 8px;
   padding: 9px 10px;
+  width: 100%;
 }
 .champ textarea { resize: vertical; min-height: 80px; }
 .champ select:focus,
-.champ textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+.champ textarea:focus,
+.champ input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
 
 .liste-maintenance { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .element-maintenance { padding-bottom: 12px; border-bottom: 1px solid var(--trait); }

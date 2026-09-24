@@ -58,21 +58,6 @@ dht22:
   serial_port: "COM3"
   baud_rate: 9600
   read_timeout_seconds: 5
-  secteur: "Pont" # secteur auquel ce capteur est rattaché (STA-01)
-
-# STA-02 : chaque simulateur peut être activé/désactivé indépendamment.
-simulateurs:
-  oxygene: true
-  stocks: true
-  maintenance: true
-
-# STA-04 : d'où vient l'effectif à bord.
-# "simulee" : générée ici automatiquement. "reelle" : envoyée par un autre
-# projet (la caméra à reconnaissance faciale) via POST /api/population.
-population:
-  source: "simulee"
-  simulee_min: 8
-  simulee_max: 14
 
 # Secteurs créés au premier démarrage si la table est vide.
 secteurs_initiaux:

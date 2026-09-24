@@ -11,9 +11,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from config import config
 from database import SessionLocal
 from services.navigation import calculer_position_du_jour
-from services.dht22 import enregistrer_lecture_dht22
-from services.simulateur import simuler_oxygene, simuler_stocks, simuler_maintenance
-from services.population import simuler_population
 
 
 SCHEDULER_CONFIG = config["scheduler"]
@@ -53,27 +50,6 @@ def tache_capture_automatique():
 
     cv2.imwrite(str(chemin), image)
     print(f"Capture enregistrée : {chemin}")
-
-
-def tache_lecture_dht22():
-    """Relève température et humidité du DHT22 (STA-01)."""
-    db = SessionLocal()
-    try:
-        enregistrer_lecture_dht22(db)
-    finally:
-        db.close()
-
-
-def tache_simulation():
-    """Génère les données simulées : oxygène, stocks, maintenance (STA-02)."""
-    db = SessionLocal()
-    try:
-        simuler_oxygene(db)
-        simuler_stocks(db)
-        simuler_maintenance(db)
-        simuler_population(db)
-    finally:
-        db.close()
 
 
 def tache_capture_manuelle():

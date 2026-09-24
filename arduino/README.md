@@ -10,16 +10,26 @@ Besoin STA-01 du cahier des charges : relever température et humidité via un
 capteur DHT22 (AM2302) branché sur l'Arduino. L'Arduino lit le capteur et
 envoie les valeurs au PC par le câble USB (liaison série).
 
-## Ce qu'il reste à faire
+## Format envoyé sur le port série
 
-- `dht22_reader/dht22_reader.ino` : le sketch Arduino qui lit le DHT22
-  (bibliothèque `DHT sensor library` d'Adafruit) et envoie les valeurs sur le
-  port série, à un intervalle régulier.
-- Décider du format envoyé (ex: une ligne JSON `{"temperature":22.5,"humidite":45.2}`)
-  et le documenter ici une fois choisi — c'est ce format que le service Python
-  côté `backend/` devra lire.
-- Câblage : DHT22 sur une broche digitale de l'Arduino (+ résistance de
-  pull-up ~10kΩ entre data et VCC si le module n'en a pas déjà une intégrée).
+Le sketch (`carte_complete.ino`, ESP32) envoie une ligne texte, pas du
+JSON :
+
+```
+Temperature: 22.4 C | Humidite: 45 % | Gaz: 612
+```
+
+Il envoie aussi, de temps en temps, une ligne `ALERTE ...` séparée — ce
+n'est pas une mesure, `backend/services/dht22.py` l'ignore et essaie la
+ligne suivante.
+
+Le "Gaz" (capteur MQ, qualité de l'air) est lu par la carte mais pas
+encore utilisé côté `backend/` — pas de colonne dédiée pour l'instant.
+
+## Câblage
+
+DHT22 sur une broche digitale de l'Arduino/ESP32 (+ résistance de pull-up
+~10kΩ entre data et VCC si le module n'en a pas déjà une intégrée).
 
 ## Qui s'en occupe
 

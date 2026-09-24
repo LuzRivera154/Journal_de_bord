@@ -15,6 +15,7 @@ from services.dht22 import enregistrer_lecture_dht22
 from services.simulateur import simuler_oxygene, simuler_stocks, simuler_maintenance
 from services.population import simuler_population
 from services.journal import generer_journal
+from services.crise import crise_active
 
 
 SCHEDULER_CONFIG = config["scheduler"]
@@ -37,6 +38,15 @@ def tache_capture_automatique():
 
     NOTE : VideoCapture(0) utilise actuellement la webcam du PC pour les tests,modifier cette partie pour utiliser la caméra définitive du projet.
     """
+    db = SessionLocal()
+    try:
+        if crise_active(db):
+            # Scénario de crise (Épic 7) : la caméra est hors service tant
+            # que la crise n'est pas terminée.
+            print("Capture automatique ignorée : crise en cours (caméra indisponible).")
+            return
+    finally:
+        db.close()
 
     dossier = Path(config["camera"]["capture_dir"]) / "Automatiques"
     dossier.mkdir(parents=True, exist_ok=True)
@@ -88,6 +98,12 @@ def tache_simulation():
 
 def tache_capture_manuelle():
     """Prend une photo manuelle et l'enregistre avec son horodatage."""
+    db = SessionLocal()
+    try:
+        if crise_active(db):
+            return {"success": False, "message": "Caméra indisponible : crise en cours."}
+    finally:
+        db.close()
 
     dossier = Path(config["camera"]["capture_dir"]) / "Manuelles"
     dossier.mkdir(parents=True, exist_ok=True)

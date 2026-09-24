@@ -63,6 +63,15 @@ class IncidentOut(BaseModel):
     statut: str
 
 
+class CriseOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    debut: datetime
+    fin: Optional[datetime]
+    id_incident: Optional[int]
+
+
 class PositionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

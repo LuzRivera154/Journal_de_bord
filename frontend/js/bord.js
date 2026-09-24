@@ -207,13 +207,37 @@ async function chargerSecteurs() {
   }
 }
 
+// Passe une fiche en rouge (bordure + pastille "Critique") quand sa valeur
+// est hors plage — l'info vient des alertes ouvertes, pas d'un seuil
+// recalculé ici, pour rester la même source de vérité que le backend
+// (services/alertes.py).
+function marquerFicheCritique(prefixe, critique) {
+  const carte = document.getElementById("fiche-" + prefixe + "-carte");
+  const pastille = document.getElementById("fiche-" + prefixe + "-pastille");
+  if (!carte || !pastille) return;
+
+  carte.classList.toggle("critique", critique);
+  pastille.hidden = !critique;
+}
+
 // Alertes en cours = incidents pas encore résolus (US-4.5, critère 2).
+// Une crise en cours (Épic 7) passe aussi les fiches en rouge, même sans
+// alerte de seuil précise sur cette mesure — la crise concerne tout le
+// vaisseau.
 async function chargerAlertes() {
   try {
-    const reponse = await fetch("/api/incidents/?statut=ouvert");
-    const alertes = await reponse.json();
+    const [reponseAlertes, reponseCrise] = await Promise.all([
+      fetch("/api/incidents/?statut=ouvert"),
+      fetch("/api/crise/"),
+    ]);
+    const alertes = await reponseAlertes.json();
+    const criseActive = (await reponseCrise.json()) !== null;
 
     document.getElementById("compteur-alertes").textContent = alertes.length + " active" + (alertes.length > 1 ? "s" : "");
+
+    marquerFicheCritique("oxygene", criseActive || alertes.some((a) => a.description.startsWith("Oxygène")));
+    marquerFicheCritique("temperature", criseActive || alertes.some((a) => a.description.startsWith("Température")));
+    marquerFicheCritique("humidite", criseActive || alertes.some((a) => a.description.startsWith("Humidité")));
 
     const liste = document.getElementById("liste-alertes");
     if (alertes.length === 0) {

@@ -193,3 +193,12 @@ Journal_de_bord/
 | Une commande marche puis, après un `pip install` ou une install (Python, Docker...), la même commande "n'est pas reconnue" | Le PATH est resté en mémoire depuis avant l'installation. Fermer complètement le terminal (voire VS Code) et en rouvrir un nouveau |
 | Le journal généré dit "modèle de langage indisponible" (texte de repli) alors qu'Ollama tourne | Le modèle n'a pas encore été téléchargé : `docker exec journal-ollama ollama pull qwen2.5:3b` (une seule fois, ~2 Go, peut prendre plusieurs minutes) |
 | Un changement dans `backend/` (routers, services, models...) ne se voit pas dans le navigateur | Si le backend tourne dans Docker, il faut le reconstruire après chaque changement Python : `docker compose up -d --build backend`. Un changement dans `frontend/` n'a pas besoin de ça (juste rafraîchir la page) |
+
+## 🛠️ Outils utilisés
+
+- **FastAPI** + **SQLAlchemy** — l'API backend et l'accès à la base
+- **PostgreSQL** — la base de données, en conteneur Docker
+- **Docker / Docker Compose** — pour que tout tourne pareil sur toutes les machines de l'équipe
+- **Ollama** (modèle `qwen2.5:3b`, en local) — génération du journal par IA, avec repli automatique si indisponible
+- **Chart.js** (auto-hébergé, pas de CDN) — les courbes du Bord
+- **Claude Code** (Anthropic) — assistant IA utilisé 
